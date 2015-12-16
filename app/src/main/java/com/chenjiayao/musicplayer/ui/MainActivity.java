@@ -33,7 +33,6 @@ public class MainActivity extends AppCompatActivity
     private Toolbar toolbar;
     private ViewPager viewPager;
     private TabLayout tabLayout;
-    private List<songInfo> infos;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,44 +44,9 @@ public class MainActivity extends AppCompatActivity
         setViewPager();
         setDrawLayout();
 
-        searchSong();
     }
 
-    private void searchSong() {
-        infos = new ArrayList<>();
-        ContentResolver resolver = getContentResolver();
-        Cursor cursor = resolver.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                null,
-                null,
-                null,
-                MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
-        while (cursor.moveToNext()) {
 
-            //id
-            int id = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID));
-            //专辑
-            String album = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM));
-            //歌曲名称
-            String songName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
-            //歌曲路径
-            String songPath = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
-            //演唱者
-            String artist = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
-            //播放时长
-            int duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION)) / 1000;
-
-            if (duration > 60) {
-                songInfo info = new songInfo();
-                info.setAlbumName(album);
-                info.setArtist(artist);
-                info.setPlayTime(duration);
-                info.setFilePath(songPath);
-                info.setSongName(songName);
-                info.save();
-            }
-
-        }
-    }
 
     private void setViewPager() {
         tabLayout = (TabLayout) findViewById(R.id.tabs);
