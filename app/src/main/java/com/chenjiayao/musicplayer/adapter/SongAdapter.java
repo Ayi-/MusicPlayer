@@ -43,7 +43,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
         public MyViewHolder(View itemView) {
             super(itemView);
             songName = (TextView) itemView.findViewById(R.id.song_name);
-            songer = (TextView) itemView.findViewById(R.id.song_songer);
+            songer = (TextView) itemView.findViewById(R.id.song_artist);
             songIcon = (ImageView) itemView.findViewById(R.id.song_icon);
         }
     }

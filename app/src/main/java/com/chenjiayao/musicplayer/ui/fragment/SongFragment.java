@@ -22,12 +22,12 @@ public class SongFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_song, container, false);
+        recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
         return view;
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
     }
 }

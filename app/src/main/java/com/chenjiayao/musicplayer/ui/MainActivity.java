@@ -1,6 +1,9 @@
 package com.chenjiayao.musicplayer.ui;
 
+import android.content.ContentResolver;
+import android.database.Cursor;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.GravityCompat;
@@ -9,12 +12,18 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
 import com.chenjiayao.musicplayer.R;
 import com.chenjiayao.musicplayer.adapter.ViewPagerAdapter;
+import com.chenjiayao.musicplayer.model.songInfo;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -24,6 +33,7 @@ public class MainActivity extends AppCompatActivity
     private Toolbar toolbar;
     private ViewPager viewPager;
     private TabLayout tabLayout;
+    private List<songInfo> infos;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +44,44 @@ public class MainActivity extends AppCompatActivity
 
         setViewPager();
         setDrawLayout();
+
+        searchSong();
+    }
+
+    private void searchSong() {
+        infos = new ArrayList<>();
+        ContentResolver resolver = getContentResolver();
+        Cursor cursor = resolver.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                null,
+                null,
+                null,
+                MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
+        while (cursor.moveToNext()) {
+
+            //id
+            int id = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID));
+            //专辑
+            String album = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM));
+            //歌曲名称
+            String songName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
+            //歌曲路径
+            String songPath = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
+            //演唱者
+            String artist = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
+            //播放时长
+            int duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION)) / 1000;
+
+            if (duration > 60) {
+                songInfo info = new songInfo();
+                info.setAlbumName(album);
+                info.setArtist(artist);
+                info.setPlayTime(duration);
+                info.setFilePath(songPath);
+                info.setSongName(songName);
+                info.save();
+            }
+
+        }
     }
 
     private void setViewPager() {

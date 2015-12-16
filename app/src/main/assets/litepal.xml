@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<litepal>
+    <dbname value="songInfo"></dbname>
+
+    <version value="1"></version>
+
+    <list>
+        <mapping class="com.chenjiayao.musicplayer.model.songInfo"></mapping>
+        <mapping class="com.chenjiayao.musicplayer.model.LyricInfo"></mapping>
+        <mapping class="com.chenjiayao.musicplayer.model.AlbumInfo"></mapping>
+    </list>
+</litepal>  
