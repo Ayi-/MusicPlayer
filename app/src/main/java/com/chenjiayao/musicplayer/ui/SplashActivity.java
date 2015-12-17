@@ -8,6 +8,8 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
+import android.view.WindowManager;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -23,18 +25,21 @@ import java.util.List;
 public class SplashActivity extends AppCompatActivity {
 
     private List<songInfo> infos;
-    RelativeLayout layout;
-    TextView textView;
+    TextView startText;
+    private ImageView startImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_splash);
-        layout = (RelativeLayout) findViewById(R.id.start_layout);
-        textView = (TextView) findViewById(R.id.start_text);
 
-        layout.animate()
-                .scaleY(1.4f).scaleX(1.4f).
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
+        setContentView(R.layout.activity_splash);
+        startText = (TextView) findViewById(R.id.start_text);
+        startImage = (ImageView) findViewById(R.id.start_image);
+        startImage.animate()
+                .scaleY(1.2f).scaleX(1.2f).
                 setDuration(3000)
                 .setListener(new MyAnimateListener() {
                     @Override
@@ -42,6 +47,7 @@ public class SplashActivity extends AppCompatActivity {
                         super.onAnimationEnd(animation);
                         Intent intent = new Intent(SplashActivity.this, MainActivity.class);
                         startActivity(intent);
+                        finish();
                     }
                 }).start();
 
@@ -84,5 +90,10 @@ public class SplashActivity extends AppCompatActivity {
                 }
             }
         }).start();
+    }
+
+    @Override
+    public void finish() {
+        super.finish();
     }
 }
