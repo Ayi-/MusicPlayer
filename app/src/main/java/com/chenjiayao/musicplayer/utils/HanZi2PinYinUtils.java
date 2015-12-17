@@ -30,7 +30,7 @@ public class HanZi2PinYinUtils {
             if (isChinese(c)) {
                 try {
                     String[] pinyin = PinyinHelper.toHanyuPinyinStringArray(c, format);
-                    sb.append(pinyin[0]);
+                    sb.append(pinyin[0]);  //有多音字我们就取第一个
                 } catch (BadHanyuPinyinOutputFormatCombination badHanyuPinyinOutputFormatCombination) {
                     badHanyuPinyinOutputFormatCombination.printStackTrace();
                 }

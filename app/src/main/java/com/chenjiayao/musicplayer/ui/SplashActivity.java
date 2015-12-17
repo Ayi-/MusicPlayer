@@ -90,6 +90,13 @@ public class SplashActivity extends AppCompatActivity {
                         info.setAlbumName(album);
                         info.setArtist(artist);
                         info.setPlayTime(duration);
+
+                        int minute = duration / 60;
+                        int second = duration % 60;
+
+                        String time = minute + ":" + second;
+                        info.setPlayTimeStr(time);
+
                         info.setFilePath(songPath);
                         info.setSongName(songName);
                         info.setPinYin(HanZi2PinYinUtils.HanZi2PinYin(songName));

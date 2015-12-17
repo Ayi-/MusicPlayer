@@ -36,6 +36,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by chen on 2015/12/14.
+ * 异步图片加载类,用到DiskLruCache和ImageUtils
  */
 public class ImageLoader {
 
@@ -201,8 +202,6 @@ public class ImageLoader {
     }
 
     /**
-     *
-     *
      * @param bytes
      * @return
      */

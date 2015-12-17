@@ -30,6 +30,8 @@ public class songInfo extends DataSupport {
      * 演唱时长
      */
     int playTime;
+
+    String playTimeStr;
     /**
      * 专辑名称
      */
@@ -48,6 +50,15 @@ public class songInfo extends DataSupport {
 
     private LyricInfo lyricInfo;
     private AlbumInfo albumInfo;
+
+
+    public String getPlayTimeStr() {
+        return playTimeStr;
+    }
+
+    public void setPlayTimeStr(String playTimeStr) {
+        this.playTimeStr = playTimeStr;
+    }
 
     public int getId() {
         return id;
