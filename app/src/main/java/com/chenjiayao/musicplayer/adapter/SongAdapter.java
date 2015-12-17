@@ -10,6 +10,8 @@ import android.widget.TextView;
 
 import com.chenjiayao.musicplayer.R;
 
+import java.util.List;
+
 /**
  * Created by chen on 2015/12/16.
  */
@@ -17,7 +19,6 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
 
     private Context context;
     private LayoutInflater inflater;
-
 
     @Override
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {

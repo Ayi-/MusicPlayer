@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
@@ -16,6 +17,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import com.chenjiayao.musicplayer.R;
 import com.chenjiayao.musicplayer.adapter.ViewPagerAdapter;
@@ -38,6 +40,8 @@ public class MainActivity extends AppCompatActivity
 
         setViewPager();
         setDrawLayout();
+        Toast.makeText(MainActivity.this,"已过滤播放时长小于2分钟的文件",Toast.LENGTH_SHORT)
+                .show();
     }
 
 
