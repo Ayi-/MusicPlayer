@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.WindowManager;
 import android.widget.ImageView;
@@ -15,6 +16,8 @@ import android.widget.TextView;
 
 import com.chenjiayao.musicplayer.R;
 import com.chenjiayao.musicplayer.model.songInfo;
+import com.chenjiayao.musicplayer.utils.HanziToPinyin;
+import com.chenjiayao.musicplayer.utils.PinYin;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -85,7 +88,6 @@ public class SplashActivity extends AppCompatActivity {
                         info.setPlayTime(duration);
                         info.setFilePath(songPath);
                         info.setSongName(songName);
-                        info.save();
                     }
                 }
             }
