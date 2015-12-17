@@ -41,9 +41,29 @@ public class songInfo extends DataSupport {
      */
     int albumId;
 
+    /**
+     * 每首歌的拼音(中文),
+     */
+    String PinYin;
+
     private LyricInfo lyricInfo;
     private AlbumInfo albumInfo;
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getPinYin() {
+        return PinYin;
+    }
+
+    public void setPinYin(String pinYin) {
+        PinYin = pinYin;
+    }
 
     public LyricInfo getLyricInfo() {
         return lyricInfo;

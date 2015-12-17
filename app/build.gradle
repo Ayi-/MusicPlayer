@@ -31,4 +31,5 @@ dependencies {
     compile 'com.google.code.gson:gson:2.2.4'
     compile 'com.loopj.android:android-async-http:1.4.9'
     compile 'de.hdodenhof:circleimageview:2.0.0'
+    compile files('libs/pinyin4j-2.5.0.jar')
 }

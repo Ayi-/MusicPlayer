@@ -21,7 +21,7 @@ public class QuickSearchView extends View {
 
     String[] letter = new String[]{
             "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N",
-            "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"
+            "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "#"
     };
     Context context;
     private Paint paint;
@@ -57,13 +57,17 @@ public class QuickSearchView extends View {
         Rect bounds = new Rect();
         for (int i = 0; i < letter.length; i++) {
 
-            String text = letter[i];
+
+            String text;
+
+            text = letter[i];
+
             int x = (int) (cellWidth / 2 - paint.measureText(text) / 2);
             paint.getTextBounds(text, 0, text.length(), bounds);
             int y = cellHeight / 2 + bounds.height() / 2 + i * cellHeight;
             //画字的坐标系和我们数学中的一样
             canvas.drawText(text, x, y, paint);
-//            canvas.drawLine(0, cellHeight * (i + 1), cellWidth, cellHeight * (i + 1), paint);
+            canvas.drawLine(0, cellHeight * (i + 1), cellWidth, cellHeight * (i + 1), paint);
         }
     }
 
@@ -84,7 +88,7 @@ public class QuickSearchView extends View {
             case MotionEvent.ACTION_DOWN:
             case MotionEvent.ACTION_MOVE:
                 index = (int) (event.getY() / cellHeight);
-                if (index >= 0 && index < letter.length) {
+                if (index >= 0 && index <= letter.length) {
                     ToastUtils.showToast(context, letter[index]);
                 }
                 break;

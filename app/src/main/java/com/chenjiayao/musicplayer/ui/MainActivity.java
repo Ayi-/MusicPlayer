@@ -21,6 +21,7 @@ import android.widget.Toast;
 
 import com.chenjiayao.musicplayer.R;
 import com.chenjiayao.musicplayer.adapter.ViewPagerAdapter;
+import com.chenjiayao.musicplayer.utils.SharePreferenceUtils;
 
 
 public class MainActivity extends AppCompatActivity
@@ -40,8 +41,14 @@ public class MainActivity extends AppCompatActivity
 
         setViewPager();
         setDrawLayout();
-        Toast.makeText(MainActivity.this,"已过滤播放时长小于2分钟的文件",Toast.LENGTH_SHORT)
-                .show();
+        SharePreferenceUtils utils = SharePreferenceUtils.getInstance(MainActivity.this);
+        if (utils.isFirstTimeUse()) {
+            Toast.makeText(MainActivity.this, "已过滤播放时长小于2分钟的文件", Toast.LENGTH_SHORT)
+                    .show();
+            utils.setNotFirst();
+        } else {
+            Toast.makeText(MainActivity.this, "主人,欢迎回来~", Toast.LENGTH_SHORT).show();
+        }
     }
 
 

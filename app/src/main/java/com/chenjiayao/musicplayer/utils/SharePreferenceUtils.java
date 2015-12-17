@@ -28,4 +28,14 @@ public class SharePreferenceUtils {
         preferences = context.getSharedPreferences(fileName, Context.MODE_PRIVATE);
         editor = preferences.edit();
     }
+
+    public boolean isFirstTimeUse() {
+        boolean res = preferences.getBoolean("firstTime", true);
+        return res;
+    }
+
+    public void setNotFirst() {
+        editor.putBoolean("firstTime", false);
+        editor.commit();
+    }
 }
