@@ -55,11 +55,12 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
     public void onBindViewHolder(MyViewHolder holder, int position) {
         songInfo info = list.get(position);
         holder.songName.setText(info.getSongName());
-        holder.singer.setText(info.getArtist());
+        holder.singer.setText(info.getArtistName());
         holder.itemView.setTag(position);
-        imageLoader.bindBitmap(info.getSongId(), info.getAlbumId(),
-                holder.songIcon, holder.songIcon.getMeasuredWidth(), holder.songIcon.getMeasuredHeight());
 
+        imageLoader.bindBitmap(info.getSongId(), info.getAlbumId(),
+                holder.songIcon, holder.songIcon.getMeasuredWidth(),
+                holder.songIcon.getMeasuredHeight());
     }
 
     @Override

@@ -21,7 +21,7 @@ public class songInfo extends DataSupport {
     /**
      * 演唱者
      */
-    String artist;
+    int artistId;
     /**
      * 文件路径,播放时候使用
      */
@@ -46,6 +46,16 @@ public class songInfo extends DataSupport {
 
     private LyricInfo lyricInfo;
     private AlbumInfo albumInfo;
+
+    String artistName;
+
+    public String getArtistName() {
+        return artistName;
+    }
+
+    public void setArtistName(String artistName) {
+        this.artistName = artistName;
+    }
 
     public int getSongId() {
         return songId;
@@ -113,12 +123,12 @@ public class songInfo extends DataSupport {
         this.songName = songName;
     }
 
-    public String getArtist() {
-        return artist;
+    public int getArtistId() {
+        return artistId;
     }
 
-    public void setArtist(String artist) {
-        this.artist = artist;
+    public void setArtistId(int artistId) {
+        this.artistId = artistId;
     }
 
     public String getFilePath() {

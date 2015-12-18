@@ -1,21 +1,15 @@
 package com.chenjiayao.musicplayer.ui.fragment;
 
-import android.app.Activity;
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.chenjiayao.musicplayer.R;
 import com.chenjiayao.musicplayer.adapter.SongAdapter;
@@ -33,13 +27,14 @@ import java.util.zip.InflaterOutputStream;
 /**
  * Created by chen on 2015/12/16.
  */
-public class SongFragment extends BaseFragment {
+public class SongFragment extends Fragment {
 
     private View view;
     private RecyclerView recyclerView;
     private SongAdapter adapter;
     private LinearLayoutManager manager;
     private QuickSearchView searchView;
+    List<songInfo> infos;
 
     @Nullable
     @Override
@@ -51,6 +46,8 @@ public class SongFragment extends BaseFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        infos = new ArrayList<>();
+        infos = DataSupport.findAll(songInfo.class);
 
         view = LayoutInflater.from(getActivity()).inflate(R.layout.fragment_song, null, true);
         recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
@@ -79,7 +76,7 @@ public class SongFragment extends BaseFragment {
         recyclerView.setLayoutManager(manager);
         recyclerView.setAdapter(adapter);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
-
+        recyclerView.setHasFixedSize(true);
         adapter.setListener(new onItemClickListener() {
             @Override
             public void onItemClick(int pos, View view) {

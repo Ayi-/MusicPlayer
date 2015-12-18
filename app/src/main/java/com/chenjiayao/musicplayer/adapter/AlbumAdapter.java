@@ -1,11 +1,14 @@
 package com.chenjiayao.musicplayer.adapter;
 
 import android.content.Context;
+import android.support.v7.graphics.Palette;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.chenjiayao.musicplayer.R;
@@ -55,9 +58,8 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.MyViewHolder
     public void onBindViewHolder(MyViewHolder holder, int position) {
         AlbumInfo info = infos.get(position);
         holder.albumName.setText(info.getAlbumName());
-        imageLoader.bindBitmap(info.getSongId(), info.getId(), holder.albumPicture,
-                holder.albumPicture.getMeasuredWidth(),
-                holder.albumPicture.getMeasuredHeight());
+        imageLoader.bindBitmap(info.getSongId(),info.getAlbumId(),
+                holder.albumPicture,holder.albumPicture.getWidth(),holder.albumPicture.getHeight());
         holder.albumArtist.setText(info.getArtist());
         holder.itemView.setTag(position);
     }
@@ -65,7 +67,6 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.MyViewHolder
     @Override
     public int getItemCount() {
         return infos.size();
-
     }
 
     public class MyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -73,13 +74,14 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.MyViewHolder
         ImageView albumPicture;
         TextView albumName;
         TextView albumArtist;
+        LinearLayout layout;
 
         public MyViewHolder(View itemView) {
             super(itemView);
             albumArtist = (TextView) itemView.findViewById(R.id.album_artist);
             albumName = (TextView) itemView.findViewById(R.id.album_name);
             albumPicture = (ImageView) itemView.findViewById(R.id.album_picture);
-
+            layout = (LinearLayout) itemView.findViewById(R.id.album_info);
             itemView.setOnClickListener(this);
         }
 

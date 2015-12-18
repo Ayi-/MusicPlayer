@@ -7,7 +7,6 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -17,7 +16,6 @@ import com.chenjiayao.musicplayer.model.AlbumInfo;
 import com.chenjiayao.musicplayer.model.songInfo;
 import com.chenjiayao.musicplayer.utils.HanZi2PinYinUtils;
 import com.chenjiayao.musicplayer.utils.SharePreferenceUtils;
-import com.loopj.android.http.LogHandler;
 
 import org.litepal.crud.DataSupport;
 
@@ -96,27 +94,34 @@ public class SplashActivity extends AppCompatActivity {
                         songInfo info = new songInfo();
 
                         //查找这个专辑编号
-                        List<AlbumInfo> list = DataSupport.where("albumName = ?", album).find(AlbumInfo.class);
+                        List<AlbumInfo> albumInfos = DataSupport.where("albumName = ?", album).find(AlbumInfo.class);
 
-                        if (list.size() == 0) {
+
+                        if (albumInfos.size() == 0) {
                             AlbumInfo albumInfo = new AlbumInfo();
-                            albumInfo.setId(albumId);
+                            albumInfo.setAlbumId(albumId);
+
                             albumInfo.setAlbumName(album);
                             albumInfo.setArtist(artist);
+
                             albumInfo.setSongId(id);
+
                             info.setAlbumInfo(albumInfo);
                             albumInfo.save();
                         }
 
                         info.setSongId(id);
-                        info.setArtist(artist);
                         info.setPlayTime(duration);
                         info.setAlbumId(albumId);
-
+                        info.setArtistName(artist);
                         int minute = duration / 60;
                         int second = duration % 60;
-
-                        String time = minute + ":" + second;
+                        String time;
+                        if (second < 10) {
+                            time = minute + ": 0" + second;
+                        } else {
+                            time = minute + ":" + second;
+                        }
                         info.setPlayTimeStr(time);
 
                         info.setFilePath(songPath);

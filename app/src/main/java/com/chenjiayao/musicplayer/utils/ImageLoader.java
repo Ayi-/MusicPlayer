@@ -5,6 +5,7 @@ import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -13,11 +14,16 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.StatFs;
+import android.support.v7.graphics.Palette;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.util.LruCache;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 import com.chenjiayao.musicplayer.R;
+import com.chenjiayao.musicplayer.adapter.AlbumAdapter;
+import com.chenjiayao.musicplayer.model.AlbumInfo;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -151,6 +157,8 @@ public class ImageLoader {
         Bitmap bitmap = loadBitmapFromCache(key);
         if (bitmap != null) {
             imageView.setImageBitmap(bitmap);
+
+
             return;
         }
         //没有找到那么就去硬盘缓存,或者网络下载
@@ -350,6 +358,7 @@ public class ImageLoader {
         Bitmap bitmap = getBitmapFromCache(key);
         return bitmap;
     }
+
 
     private static class LoaderResult {
         public ImageView imageView;

@@ -15,7 +15,7 @@
             android:layout_height="50dp"
             android:layout_centerVertical="true"
             android:layout_marginLeft="10dp"
-            android:src="@mipmap/ic_launcher"/>
+            android:src="@mipmap/ic_launcher" />
 
         <TextView
             android:id="@+id/song_name"
@@ -24,6 +24,7 @@
             android:layout_alignTop="@id/song_icon"
             android:layout_marginLeft="10dp"
             android:layout_toRightOf="@id/song_icon"
+            android:singleLine="true"
             android:text="青花瓷"
             android:textSize="20sp" />
 
