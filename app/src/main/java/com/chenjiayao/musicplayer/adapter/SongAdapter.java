@@ -1,6 +1,8 @@
 package com.chenjiayao.musicplayer.adapter;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,20 +13,21 @@ import android.widget.TextView;
 
 import com.chenjiayao.musicplayer.R;
 import com.chenjiayao.musicplayer.model.songInfo;
+import com.chenjiayao.musicplayer.utils.ImageLoader;
 
 import java.util.List;
 
 /**
  * Created by chen on 2015/12/16.
  */
-public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> implements View.OnClickListener {
+public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> {
 
     private Context context;
     private LayoutInflater inflater;
     private List<songInfo> list;
+    private ImageLoader imageLoader;
 
-
-    interface onItemClickListener {
+    public interface onItemClickListener {
         void onItemClick(int pos, View view);
     }
 
@@ -36,6 +39,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
 
     public SongAdapter(Context context, List<songInfo> list) {
         this.context = context;
+        imageLoader = ImageLoader.build(context);
         this.list = list;
         inflater = LayoutInflater.from(context);
     }
@@ -49,19 +53,13 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
 
     @Override
     public void onBindViewHolder(MyViewHolder holder, int position) {
-        holder.songName.setText(list.get(position).getSongName());
-        holder.singer.setText(list.get(position).getArtist());
-        holder.playTime.setText(list.get(position).getPlayTimeStr());
+        songInfo info = list.get(position);
+        holder.songName.setText(info.getSongName());
+        holder.singer.setText(info.getArtist());
         holder.itemView.setTag(position);
-        holder.itemView.setOnClickListener(this);
-    }
+        imageLoader.bindBitmap(info.getId(), info.getAlbumId(),
+                holder.songIcon, holder.songIcon.getMeasuredWidth(), holder.songIcon.getMeasuredHeight());
 
-    @Override
-    public void onClick(View v) {
-        if (listener != null) {
-            int pos = (int) v.getTag();
-            listener.onItemClick(pos, v);
-        }
     }
 
     @Override
@@ -69,19 +67,27 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
         return list.size();
     }
 
-    public class MyViewHolder extends RecyclerView.ViewHolder {
+    public class MyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         TextView songName;
         TextView singer;
         ImageView songIcon;
-        TextView playTime;
 
         public MyViewHolder(View itemView) {
             super(itemView);
             songName = (TextView) itemView.findViewById(R.id.song_name);
             singer = (TextView) itemView.findViewById(R.id.song_artist);
             songIcon = (ImageView) itemView.findViewById(R.id.song_icon);
-            playTime = (TextView) itemView.findViewById(R.id.play_time);
+
+            itemView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            if (listener != null) {
+                int pos = (int) v.getTag();
+                listener.onItemClick(pos, v);
+            }
         }
     }
 }

@@ -1,9 +1,11 @@
 package com.chenjiayao.musicplayer.utils;
 
 import android.annotation.TargetApi;
+import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
@@ -21,10 +23,10 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.security.MessageDigest;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -37,6 +39,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Created by chen on 2015/12/14.
  * 异步图片加载类,用到DiskLruCache和ImageUtils
+ * 以前用在网络加载,这次直接修改为从内容提供者加载.
  */
 public class ImageLoader {
 
@@ -96,7 +99,7 @@ public class ImageLoader {
 
         int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
 
-        int cacheSize = maxMemory / 8;
+        int cacheSize = maxMemory / 24;
 
         memoryCache = new LruCache<String, Bitmap>(cacheSize) {
             //计算每一个缓存对象的大小
@@ -138,26 +141,27 @@ public class ImageLoader {
     }
 
 
-    public void bindBitmap(final String uri, final ImageView imageView, final int reqWidth,
+    public void bindBitmap(final long song_id, final long album_id, final ImageView imageView, final int reqWidth,
                            final int reqHeight) {
-        imageView.setTag(TAG_URL, uri);
+
+        String key = String.valueOf(song_id) + String.valueOf(album_id);
+        imageView.setTag(TAG_URL, key);
 
         //在内存缓存中寻找
-        Bitmap bitmap = loadBitmapFromCache(uri);
+        Bitmap bitmap = loadBitmapFromCache(key);
         if (bitmap != null) {
             imageView.setImageBitmap(bitmap);
             return;
         }
-
         //没有找到那么就去硬盘缓存,或者网络下载
         //即使硬盘缓存中也要放入线程中
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
                 //加载图片
-                Bitmap bt = loadBitmap(uri, reqWidth, reqHeight);
+                Bitmap bt = loadBitmap(song_id, album_id, reqWidth, reqHeight);
                 if (bt != null) {
-                    LoaderResult result = new LoaderResult(imageView, uri, bt);
+                    LoaderResult result = new LoaderResult(imageView, String.valueOf(song_id) + String.valueOf(album_id), bt);
                     mainHandler.obtainMessage(MESSAGE_POST_RESULT, result).sendToTarget();
                 }
             }
@@ -231,126 +235,75 @@ public class ImageLoader {
     }
 
     /**
-     * 依次从内存,硬盘获取缓存,没有就去网上下载
+     * 依次从内存,硬盘获取缓存,没有从流中读取
      *
-     * @param uri
+     * @param
      * @param reqWidth
      * @param reqHeight
      * @return
      */
-    private Bitmap loadBitmap(String uri, int reqWidth, int reqHeight) {
-        Bitmap bitmap = loadBitmapFromCache(uri);
+    private Bitmap loadBitmap(long song_id, long album_id, int reqWidth, int reqHeight) {
+        Bitmap bitmap = loadBitmapFromCache(String.valueOf(song_id) + String.valueOf(album_id));
         if (bitmap != null) {
             return bitmap;
         }
 
         //去硬盘获取缓存
-        bitmap = loadBitmapFromDisk(uri, reqWidth, reqHeight);
+        bitmap = loadBitmapFromDisk(song_id, album_id, reqWidth, reqHeight);
         if (bitmap != null) {
             return bitmap;
         }
+        Log.i("TAG", "========");
 
-        bitmap = loadBitmapFromHttp(uri, reqWidth, reqHeight);
-
-        if (null == bitmap && !isDiskCacheCreated) {
-            bitmap = downloadBitmapFromUrl(uri);
-        }
-        return bitmap;
-    }
-
-    private Bitmap downloadBitmapFromUrl(String uriString) {
-        Bitmap bitmap = null;
-        HttpURLConnection conn = null;
-        BufferedInputStream in = null;
-
-        try {
-            URL url = new URL(uriString);
-            conn = (HttpURLConnection) url.openConnection();
-            in = new BufferedInputStream(conn.getInputStream(), IO_BUFFER_SIZE);
-            bitmap = BitmapFactory.decodeStream(in);
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (conn != null) {
-                conn.disconnect();
-            }
-            try {
-                in.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+        bitmap = loadBitmapFromStream(song_id, album_id, reqWidth, reqHeight);
         return bitmap;
     }
 
 
-    /**
-     * 从网络下面下载图片,然后放到硬盘缓存中
-     *
-     * @param uri
-     * @param reqWidth
-     * @param reqHeight
-     * @return
-     */
-    private Bitmap loadBitmapFromHttp(String uri, int reqWidth, int reqHeight) {
-        if (Looper.getMainLooper() == Looper.myLooper()) {
-            throw new RuntimeException("can not visit network from UI Thread");
-        }
-        if (diskLruCache == null) {
-            return null;
-        }
+    private Bitmap loadBitmapFromStream(long song_id, long album_id, int reqWidth, int reqHeight) {
+        final Uri artistUri = Uri.parse("content://media/external/audio/albumart");
+        Uri uri = ContentUris.withAppendedId(artistUri, album_id);
+        ContentResolver res = context.getContentResolver();
+        String key = hashKeyFormUrl(String.valueOf(song_id) + String.valueOf(album_id));
 
-        String key = hashKeyFormUrl(uri);
+
         try {
-            DiskLruCache.Editor editor = diskLruCache.edit(key);
-            if (editor != null) {
-                OutputStream outputStream = editor.newOutputStream(0);
-                if (downloadToStream(uri, outputStream)) {
-                    editor.commit();
+            InputStream in = res.openInputStream(uri);
+            DiskLruCache.Editor edit = diskLruCache.edit(key);
+            if (edit != null) {
+                OutputStream os = edit.newOutputStream(0);
+                if (downloadToStream(in, os)) {
+                    edit.commit();
                 } else {
-                    editor.abort();
+                    edit.abort();
                 }
                 diskLruCache.flush();
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
-        //最后下载下来之后,我们从硬盘缓存中拿
-        return loadBitmapFromDisk(uri, reqWidth, reqHeight);
+
+        return loadBitmapFromDisk(song_id, album_id, reqWidth, reqHeight);
     }
 
-    /**
-     * 从uri里面下载到outputStream里面
-     *
-     * @param uriString
-     * @param outputStream
-     * @return
-     */
-    private boolean downloadToStream(String uriString, OutputStream outputStream) {
-        HttpURLConnection conn = null;
-        BufferedOutputStream os = null;
-        BufferedInputStream is = null;
+    private boolean downloadToStream(InputStream in, OutputStream os) {
+        BufferedInputStream bis = null;
+        BufferedOutputStream bos = null;
 
+        bis = new BufferedInputStream(in, IO_BUFFER_SIZE);
+        bos = new BufferedOutputStream(os, IO_BUFFER_SIZE);
+        int b;
         try {
-            URL url = new URL(uriString);
-            conn = (HttpURLConnection) url.openConnection();
-            is = new BufferedInputStream(conn.getInputStream(), IO_BUFFER_SIZE);
-            os = new BufferedOutputStream(outputStream, IO_BUFFER_SIZE);
-
-            int b;
-            while ((b = is.read()) != -1) {
-                os.write(b);
+            while ((b = bis.read()) != -1) {
+                bos.write(b);
             }
             return true;
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (conn != null) {
-                conn.disconnect();
-            }
             try {
-                is.close();
-                os.close();
+                bos.close();
+                bis.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -358,15 +311,8 @@ public class ImageLoader {
         return false;
     }
 
-    /**
-     * 从硬盘获取缓存,顺便把这个图片放入内存缓存中
-     *
-     * @param uri
-     * @param reqWidth
-     * @param reqHeight
-     * @return
-     */
-    private Bitmap loadBitmapFromDisk(String uri, int reqWidth, int reqHeight) {
+
+    private Bitmap loadBitmapFromDisk(long song_id, long album_id, int reqWidth, int reqHeight) {
         if (Looper.myLooper() == Looper.getMainLooper()) {
             Log.e("TAG", "don't do it in UI Thread");
         }
@@ -376,7 +322,7 @@ public class ImageLoader {
         }
 
         Bitmap bitmap = null;
-        String key = hashKeyFormUrl(uri);
+        String key = hashKeyFormUrl(String.valueOf(song_id) + String.valueOf(album_id));
         try {
             DiskLruCache.Snapshot snapshot = diskLruCache.get(key);
             if (snapshot != null) {
@@ -392,6 +338,7 @@ public class ImageLoader {
         }
         return bitmap;
     }
+
 
     /**
      * 从内存缓存获取

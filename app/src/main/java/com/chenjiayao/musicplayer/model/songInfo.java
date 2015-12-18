@@ -49,7 +49,7 @@ public class songInfo extends DataSupport {
     String PinYin;
 
     private LyricInfo lyricInfo;
-    private AlbumInfo albumInfo;
+//    private AlbumInfo albumInfo;
 
 
     public String getPlayTimeStr() {
@@ -84,13 +84,6 @@ public class songInfo extends DataSupport {
         this.lyricInfo = lyricInfo;
     }
 
-    public AlbumInfo getAlbumInfo() {
-        return albumInfo;
-    }
-
-    public void setAlbumInfo(AlbumInfo albumInfo) {
-        this.albumInfo = albumInfo;
-    }
 
     public int getAlbumId() {
         return albumId;

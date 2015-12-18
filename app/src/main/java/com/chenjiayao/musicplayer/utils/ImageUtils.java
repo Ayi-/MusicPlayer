@@ -3,6 +3,7 @@ package com.chenjiayao.musicplayer.utils;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 
 import java.io.FileDescriptor;
 
@@ -28,20 +29,24 @@ public class ImageUtils {
         return BitmapFactory.decodeResource(res, resId, options);
     }
 
-    private int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
+
+    public int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
+        Log.i("TAG", "req : " + reqWidth + "   " + reqHeight);
         if (reqWidth == 0 || reqHeight == 0) {
             return 1;
         }
 
         int height = options.outHeight;
         int width = options.outWidth;
+        Log.i("TAG", "height : " + width + "   " + height);
 
         int inSampleSize = 1;
 
-        if (height > reqHeight || width > reqWidth) {
-            int halfWidth = reqWidth / 2;
-            int halfHeight = reqHeight / 2;
 
+        if (height > reqHeight || width > reqWidth) {
+            int halfWidth = width / 2;
+            int halfHeight = height / 2;
+            Log.i("TAG", "req : " + reqWidth + "  " + width);
             while ((halfHeight / inSampleSize) >= reqHeight
                     && (halfWidth / inSampleSize) >= reqWidth) {
                 inSampleSize *= 2;

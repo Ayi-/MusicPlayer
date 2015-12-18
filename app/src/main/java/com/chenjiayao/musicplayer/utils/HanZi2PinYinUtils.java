@@ -21,7 +21,7 @@ public class HanZi2PinYinUtils {
 
     public static String HanZi2PinYin(String input) {
         String res = null;
-        format.setCaseType(HanyuPinyinCaseType.LOWERCASE);
+        format.setCaseType(HanyuPinyinCaseType.UPPERCASE);
         format.setToneType(HanyuPinyinToneType.WITHOUT_TONE);
         StringBuffer sb = new StringBuffer();
 

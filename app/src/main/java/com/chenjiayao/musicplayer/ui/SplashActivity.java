@@ -85,11 +85,17 @@ public class SplashActivity extends AppCompatActivity {
                     //播放时长
                     int duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION)) / 1000;
 
+                    //歌曲id
+                    int id = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID));
+                    //专辑id
+                    int albumId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID));
                     if (duration > 120) {
                         songInfo info = new songInfo();
+                        info.setId(id);
                         info.setAlbumName(album);
                         info.setArtist(artist);
                         info.setPlayTime(duration);
+                        info.setAlbumId(albumId);
 
                         int minute = duration / 60;
                         int second = duration % 60;

@@ -9,7 +9,6 @@ import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Toast;
 
 import com.chenjiayao.musicplayer.utils.ToastUtils;
 
@@ -26,6 +25,17 @@ public class QuickSearchView extends View {
     Context context;
     private Paint paint;
 
+
+    public interface onTouchListener {
+        void onTouch(String s);
+    }
+
+    public onTouchListener listener;
+
+    public void setListener(onTouchListener listener) {
+        this.listener = listener;
+    }
+
     /**
      * 每个单元格的宽度
      */
@@ -34,6 +44,8 @@ public class QuickSearchView extends View {
      * 每个单元格的高度
      */
     private int cellHeight;
+
+    int touchIndex = -1;
 
     public QuickSearchView(Context context) {
         this(context, null);
@@ -67,7 +79,7 @@ public class QuickSearchView extends View {
             int y = cellHeight / 2 + bounds.height() / 2 + i * cellHeight;
             //画字的坐标系和我们数学中的一样
             canvas.drawText(text, x, y, paint);
-            canvas.drawLine(0, cellHeight * (i + 1), cellWidth, cellHeight * (i + 1), paint);
+//            canvas.drawLine(0, cellHeight * (i + 1), cellWidth, cellHeight * (i + 1), paint);
         }
     }
 
@@ -83,13 +95,18 @@ public class QuickSearchView extends View {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         int action = event.getAction();
-        int index = -1;
+        int index = -2;
         switch (action) {
             case MotionEvent.ACTION_DOWN:
             case MotionEvent.ACTION_MOVE:
                 index = (int) (event.getY() / cellHeight);
-                if (index >= 0 && index <= letter.length) {
-                    ToastUtils.showToast(context, letter[index]);
+                if (index >= 0 && index < letter.length) {
+                    if (index != touchIndex) {
+                        touchIndex = index;
+                        if (listener != null) {
+                            listener.onTouch(letter[index]);
+                        }
+                    }
                 }
                 break;
             case MotionEvent.ACTION_UP:
@@ -98,4 +115,6 @@ public class QuickSearchView extends View {
         }
         return true;
     }
+
+
 }
