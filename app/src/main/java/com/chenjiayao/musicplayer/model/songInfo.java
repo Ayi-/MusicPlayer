@@ -32,16 +32,12 @@ public class songInfo extends DataSupport {
     int playTime;
 
     String playTimeStr;
-    /**
-     * 专辑名称
-     */
-    String albumName;
 
-    /**
-     * 为了从歌词迷API获取封面专辑所用id
-     * 对应文档中的aid
-     */
+
     int albumId;
+
+
+    int songId;
 
     /**
      * 每首歌的拼音(中文),
@@ -49,8 +45,23 @@ public class songInfo extends DataSupport {
     String PinYin;
 
     private LyricInfo lyricInfo;
-//    private AlbumInfo albumInfo;
+    private AlbumInfo albumInfo;
 
+    public int getSongId() {
+        return songId;
+    }
+
+    public void setSongId(int songId) {
+        this.songId = songId;
+    }
+
+    public AlbumInfo getAlbumInfo() {
+        return albumInfo;
+    }
+
+    public void setAlbumInfo(AlbumInfo albumInfo) {
+        this.albumInfo = albumInfo;
+    }
 
     public String getPlayTimeStr() {
         return playTimeStr;
@@ -126,22 +137,4 @@ public class songInfo extends DataSupport {
         this.playTime = playTime;
     }
 
-    public String getAlbumName() {
-        return albumName;
-    }
-
-    public void setAlbumName(String albumName) {
-        this.albumName = albumName;
-    }
-
-    //下面暂时没用
-    //int songId;
-
-//    public int getSongId() {
-//        return songId;
-//    }
-//
-//    public void setSongId(int songId) {
-//        this.songId = songId;
-//    }
 }

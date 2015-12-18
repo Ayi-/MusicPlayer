@@ -57,7 +57,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
         holder.songName.setText(info.getSongName());
         holder.singer.setText(info.getArtist());
         holder.itemView.setTag(position);
-        imageLoader.bindBitmap(info.getId(), info.getAlbumId(),
+        imageLoader.bindBitmap(info.getSongId(), info.getAlbumId(),
                 holder.songIcon, holder.songIcon.getMeasuredWidth(), holder.songIcon.getMeasuredHeight());
 
     }

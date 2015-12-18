@@ -33,11 +33,10 @@ import java.util.zip.InflaterOutputStream;
 /**
  * Created by chen on 2015/12/16.
  */
-public class SongFragment extends Fragment {
+public class SongFragment extends BaseFragment {
 
     private View view;
     private RecyclerView recyclerView;
-    List<songInfo> infos;
     private SongAdapter adapter;
     private LinearLayoutManager manager;
     private QuickSearchView searchView;
@@ -56,7 +55,6 @@ public class SongFragment extends Fragment {
         view = LayoutInflater.from(getActivity()).inflate(R.layout.fragment_song, null, true);
         recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
         searchView = (QuickSearchView) view.findViewById(R.id.indicator);
-        infos = new ArrayList<>();
 
         setRecyclerView();
 
@@ -73,11 +71,9 @@ public class SongFragment extends Fragment {
                 }
             }
         });
-
     }
 
     private void setRecyclerView() {
-        infos = DataSupport.findAll(songInfo.class);
         adapter = new SongAdapter(getActivity(), infos);
         manager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
         recyclerView.setLayoutManager(manager);

@@ -13,9 +13,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.chenjiayao.musicplayer.R;
+import com.chenjiayao.musicplayer.model.AlbumInfo;
 import com.chenjiayao.musicplayer.model.songInfo;
 import com.chenjiayao.musicplayer.utils.HanZi2PinYinUtils;
 import com.chenjiayao.musicplayer.utils.SharePreferenceUtils;
+import com.loopj.android.http.LogHandler;
+
+import org.litepal.crud.DataSupport;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -84,15 +88,27 @@ public class SplashActivity extends AppCompatActivity {
                     String artist = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
                     //播放时长
                     int duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION)) / 1000;
-
                     //歌曲id
                     int id = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID));
                     //专辑id
                     int albumId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID));
                     if (duration > 120) {
                         songInfo info = new songInfo();
-                        info.setId(id);
-                        info.setAlbumName(album);
+
+                        //查找这个专辑编号
+                        List<AlbumInfo> list = DataSupport.where("albumName = ?", album).find(AlbumInfo.class);
+
+                        if (list.size() == 0) {
+                            AlbumInfo albumInfo = new AlbumInfo();
+                            albumInfo.setId(albumId);
+                            albumInfo.setAlbumName(album);
+                            albumInfo.setArtist(artist);
+                            albumInfo.setSongId(id);
+                            info.setAlbumInfo(albumInfo);
+                            albumInfo.save();
+                        }
+
+                        info.setSongId(id);
                         info.setArtist(artist);
                         info.setPlayTime(duration);
                         info.setAlbumId(albumId);

@@ -31,14 +31,12 @@ public class ImageUtils {
 
 
     public int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
-        Log.i("TAG", "req : " + reqWidth + "   " + reqHeight);
         if (reqWidth == 0 || reqHeight == 0) {
             return 1;
         }
 
         int height = options.outHeight;
         int width = options.outWidth;
-        Log.i("TAG", "height : " + width + "   " + height);
 
         int inSampleSize = 1;
 
@@ -46,7 +44,6 @@ public class ImageUtils {
         if (height > reqHeight || width > reqWidth) {
             int halfWidth = width / 2;
             int halfHeight = height / 2;
-            Log.i("TAG", "req : " + reqWidth + "  " + width);
             while ((halfHeight / inSampleSize) >= reqHeight
                     && (halfWidth / inSampleSize) >= reqWidth) {
                 inSampleSize *= 2;

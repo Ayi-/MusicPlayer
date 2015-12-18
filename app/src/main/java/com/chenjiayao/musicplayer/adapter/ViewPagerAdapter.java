@@ -22,8 +22,8 @@ public class ViewPagerAdapter extends FragmentPagerAdapter {
     public ViewPagerAdapter(FragmentManager fm) {
         super(fm);
         lists.add(new SongFragment());
-        lists.add(new ArtistFragment());
         lists.add(new AlbumFragment());
+        lists.add(new ArtistFragment());
         titles.add("歌曲");
         titles.add("专辑");
         titles.add("歌手");

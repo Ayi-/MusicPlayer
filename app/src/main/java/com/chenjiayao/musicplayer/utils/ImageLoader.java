@@ -6,6 +6,7 @@ import android.content.ContentUris;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
@@ -23,7 +24,6 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -253,7 +253,6 @@ public class ImageLoader {
         if (bitmap != null) {
             return bitmap;
         }
-        Log.i("TAG", "========");
 
         bitmap = loadBitmapFromStream(song_id, album_id, reqWidth, reqHeight);
         return bitmap;
