@@ -7,5 +7,6 @@
     <list>
         <mapping class="com.chenjiayao.musicplayer.model.songInfo"></mapping>
         <mapping class="com.chenjiayao.musicplayer.model.AlbumInfo"></mapping>
+        <mapping class="com.chenjiayao.musicplayer.model.artistInfo" />
     </list>
 </litepal>  

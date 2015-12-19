@@ -12,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.chenjiayao.musicplayer.R;
+import com.chenjiayao.musicplayer.model.artistInfo;
 import com.chenjiayao.musicplayer.model.songInfo;
 import com.chenjiayao.musicplayer.utils.ImageLoader;
 
@@ -54,8 +55,9 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
     @Override
     public void onBindViewHolder(MyViewHolder holder, int position) {
         songInfo info = list.get(position);
+
         holder.songName.setText(info.getSongName());
-        holder.singer.setText(info.getArtistName());
+        holder.singer.setText(info.getArtistInfo().getName());
         holder.itemView.setTag(position);
 
         imageLoader.bindBitmap(info.getSongId(), info.getAlbumId(),

@@ -105,7 +105,7 @@ public class ImageLoader {
 
         int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
 
-        int cacheSize = maxMemory / 24;
+        int cacheSize = maxMemory / 8;
 
         memoryCache = new LruCache<String, Bitmap>(cacheSize) {
             //计算每一个缓存对象的大小
@@ -364,11 +364,11 @@ public class ImageLoader {
         public ImageView imageView;
         public String url;
         public Bitmap bitmap;
-
         public LoaderResult(ImageView imageView, String url, Bitmap bitmap) {
             this.imageView = imageView;
             this.url = url;
             this.bitmap = bitmap;
+
         }
     }
 }

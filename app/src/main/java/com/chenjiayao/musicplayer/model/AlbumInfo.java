@@ -11,7 +11,6 @@ public class AlbumInfo extends DataSupport {
     private String artist;
 
     private int songId;
-
     private int albumId;
 
     private int rbg;

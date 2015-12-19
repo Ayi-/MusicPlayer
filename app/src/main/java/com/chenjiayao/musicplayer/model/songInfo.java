@@ -2,6 +2,8 @@ package com.chenjiayao.musicplayer.model;
 
 import org.litepal.crud.DataSupport;
 
+import java.util.List;
+
 /**
  * Created by chen on 2015/12/16.
  * 根据歌名和演唱者可以获得GeCiMiLyric的内容
@@ -18,10 +20,8 @@ public class songInfo extends DataSupport {
      * 歌曲名称
      */
     String songName;
-    /**
-     * 演唱者
-     */
-    int artistId;
+
+
     /**
      * 文件路径,播放时候使用
      */
@@ -36,7 +36,6 @@ public class songInfo extends DataSupport {
 
     int albumId;
 
-
     int songId;
 
     /**
@@ -44,17 +43,18 @@ public class songInfo extends DataSupport {
      */
     String PinYin;
 
+
     private LyricInfo lyricInfo;
     private AlbumInfo albumInfo;
+    private artistInfo artistInfo;
 
-    String artistName;
-
-    public String getArtistName() {
-        return artistName;
+    public artistInfo getArtistInfo() {
+        return artistInfo;
     }
 
-    public void setArtistName(String artistName) {
-        this.artistName = artistName;
+
+    public void setArtistInfo(artistInfo artistInfo) {
+        this.artistInfo = artistInfo;
     }
 
     public int getSongId() {
@@ -123,13 +123,6 @@ public class songInfo extends DataSupport {
         this.songName = songName;
     }
 
-    public int getArtistId() {
-        return artistId;
-    }
-
-    public void setArtistId(int artistId) {
-        this.artistId = artistId;
-    }
 
     public String getFilePath() {
         return filePath;

@@ -58,8 +58,8 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.MyViewHolder
     public void onBindViewHolder(MyViewHolder holder, int position) {
         AlbumInfo info = infos.get(position);
         holder.albumName.setText(info.getAlbumName());
-        imageLoader.bindBitmap(info.getSongId(),info.getAlbumId(),
-                holder.albumPicture,holder.albumPicture.getWidth(),holder.albumPicture.getHeight());
+        imageLoader.bindBitmap(info.getSongId(), info.getAlbumId(),
+                holder.albumPicture, holder.albumPicture.getWidth(), holder.albumPicture.getHeight());
         holder.albumArtist.setText(info.getArtist());
         holder.itemView.setTag(position);
     }

@@ -1,5 +1,6 @@
 package com.chenjiayao.musicplayer.ui.fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -16,13 +17,13 @@ import com.chenjiayao.musicplayer.adapter.SongAdapter;
 import com.chenjiayao.musicplayer.adapter.SongAdapter.onItemClickListener;
 import com.chenjiayao.musicplayer.model.songInfo;
 import com.chenjiayao.musicplayer.ui.QuickSearchView;
+import com.chenjiayao.musicplayer.utils.PlayUtils;
 import com.chenjiayao.musicplayer.utils.ToastUtils;
 
 import org.litepal.crud.DataSupport;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.zip.InflaterOutputStream;
 
 /**
  * Created by chen on 2015/12/16.
@@ -35,6 +36,8 @@ public class SongFragment extends Fragment {
     private LinearLayoutManager manager;
     private QuickSearchView searchView;
     List<songInfo> infos;
+    PlayUtils playUtils;
+    int lastPos = -1;
 
     @Nullable
     @Override
@@ -47,8 +50,7 @@ public class SongFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         infos = new ArrayList<>();
-        infos = DataSupport.findAll(songInfo.class);
-
+        infos = DataSupport.findAll(songInfo.class, true);
         view = LayoutInflater.from(getActivity()).inflate(R.layout.fragment_song, null, true);
         recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
         searchView = (QuickSearchView) view.findViewById(R.id.indicator);
@@ -80,9 +82,18 @@ public class SongFragment extends Fragment {
         adapter.setListener(new onItemClickListener() {
             @Override
             public void onItemClick(int pos, View view) {
-                Log.i("TAG", infos.get(pos).getSongName());
+                lastPos = pos;
+                beginPlay(pos);
+//                new Intent()
             }
         });
     }
 
+    private void beginPlay(int pos) {
+        playUtils = PlayUtils.getInstance();
+
+        songInfo info = infos.get(pos);
+        String path = info.getFilePath();
+        playUtils.startPlay(path);
+    }
 }

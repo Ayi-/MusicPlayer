@@ -7,12 +7,14 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.chenjiayao.musicplayer.R;
 import com.chenjiayao.musicplayer.model.AlbumInfo;
+import com.chenjiayao.musicplayer.model.artistInfo;
 import com.chenjiayao.musicplayer.model.songInfo;
 import com.chenjiayao.musicplayer.utils.HanZi2PinYinUtils;
 import com.chenjiayao.musicplayer.utils.SharePreferenceUtils;
@@ -95,8 +97,17 @@ public class SplashActivity extends AppCompatActivity {
 
                         //查找这个专辑编号
                         List<AlbumInfo> albumInfos = DataSupport.where("albumName = ?", album).find(AlbumInfo.class);
+                        List<artistInfo> artistInfos = DataSupport.where("name = ?", artist).find(artistInfo.class);
 
-
+                        if (artistInfos.size() == 0) {
+                            artistInfo artistInfo = new artistInfo();
+                            artistInfo.setName(artist);
+                            artistInfo.save();
+                            info.setArtistInfo(artistInfo);
+                        } else {
+                            info.setArtistInfo(artistInfos.get(0));
+                        }
+                        //专辑
                         if (albumInfos.size() == 0) {
                             AlbumInfo albumInfo = new AlbumInfo();
                             albumInfo.setAlbumId(albumId);
@@ -105,15 +116,12 @@ public class SplashActivity extends AppCompatActivity {
                             albumInfo.setArtist(artist);
 
                             albumInfo.setSongId(id);
-
                             info.setAlbumInfo(albumInfo);
                             albumInfo.save();
                         }
-
                         info.setSongId(id);
                         info.setPlayTime(duration);
                         info.setAlbumId(albumId);
-                        info.setArtistName(artist);
                         int minute = duration / 60;
                         int second = duration % 60;
                         String time;
@@ -122,8 +130,8 @@ public class SplashActivity extends AppCompatActivity {
                         } else {
                             time = minute + ":" + second;
                         }
-                        info.setPlayTimeStr(time);
 
+                        info.setPlayTimeStr(time);
                         info.setFilePath(songPath);
                         info.setSongName(songName);
                         info.setPinYin(HanZi2PinYinUtils.HanZi2PinYin(songName));
