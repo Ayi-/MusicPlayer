@@ -7,29 +7,26 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.chenjiayao.musicplayer.R;
 import com.chenjiayao.musicplayer.model.AlbumInfo;
-import com.chenjiayao.musicplayer.model.artistInfo;
-import com.chenjiayao.musicplayer.model.songInfo;
-import com.chenjiayao.musicplayer.utils.HanZi2PinYinUtils;
+import com.chenjiayao.musicplayer.model.ArtistInfo;
+import com.chenjiayao.musicplayer.model.SongInfo;
 import com.chenjiayao.musicplayer.utils.SharePreferenceUtils;
 
 import org.litepal.crud.DataSupport;
 
-import java.util.ArrayList;
 import java.util.List;
+
 
 /**
  * Created by chen on 2015/12/16.
  */
 public class SplashActivity extends AppCompatActivity {
 
-    private List<songInfo> infos;
     TextView startText;
     private ImageView startImage;
 
@@ -55,8 +52,8 @@ public class SplashActivity extends AppCompatActivity {
                         finish();
                     }
                 }).start();
-
         SharePreferenceUtils utils = SharePreferenceUtils.getInstance(SplashActivity.this);
+
         if (utils.isFirstTimeUse()) {
             searchSongs();
         }
@@ -66,10 +63,11 @@ public class SplashActivity extends AppCompatActivity {
      * 开启一个线程扫描歌曲
      */
     private void searchSongs() {
+
         new Thread(new Runnable() {
             @Override
             public void run() {
-                infos = new ArrayList<>();
+
                 ContentResolver resolver = getContentResolver();
                 Cursor cursor = resolver.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                         null,
@@ -80,62 +78,51 @@ public class SplashActivity extends AppCompatActivity {
 
                     //专辑
                     String album = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM));
+
                     //歌曲名称
                     String songName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
+
                     //歌曲路径
                     String songPath = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
+
                     //演唱者
                     String artist = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
+
                     //播放时长
                     int duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION)) / 1000;
+
                     //歌曲id
                     int id = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID));
+
                     //专辑id
                     int albumId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID));
+
                     if (duration > 120) {
-                        songInfo info = new songInfo();
 
-                        //查找这个专辑编号
-                        List<AlbumInfo> albumInfos = DataSupport.where("albumName = ?", album).find(AlbumInfo.class);
-                        List<artistInfo> artistInfos = DataSupport.where("name = ?", artist).find(artistInfo.class);
+                        SongInfo info = new SongInfo();
+                        info.setPath(songPath);
+                        info.setSongName(songName);
+                        info.setAlbumName(album);
+                        info.setAlbumId(albumId);
+                        info.setArtistName(artist);
+                        info.setSongId(id);
+                        info.save();
 
-                        if (artistInfos.size() == 0) {
-                            artistInfo artistInfo = new artistInfo();
-                            artistInfo.setName(artist);
-                            artistInfo.save();
-                            info.setArtistInfo(artistInfo);
-                        } else {
-                            info.setArtistInfo(artistInfos.get(0));
-                        }
-                        //专辑
+                        List<AlbumInfo> albumInfos = DataSupport.where("albumid = ?", String.valueOf(albumId)).find(AlbumInfo.class);
+
                         if (albumInfos.size() == 0) {
                             AlbumInfo albumInfo = new AlbumInfo();
                             albumInfo.setAlbumId(albumId);
-
-                            albumInfo.setAlbumName(album);
-                            albumInfo.setArtist(artist);
-
-                            albumInfo.setSongId(id);
-                            info.setAlbumInfo(albumInfo);
+                            albumInfo.setName(album);
                             albumInfo.save();
                         }
-                        info.setSongId(id);
-                        info.setPlayTime(duration);
-                        info.setAlbumId(albumId);
-                        int minute = duration / 60;
-                        int second = duration % 60;
-                        String time;
-                        if (second < 10) {
-                            time = minute + ": 0" + second;
-                        } else {
-                            time = minute + ":" + second;
-                        }
 
-                        info.setPlayTimeStr(time);
-                        info.setFilePath(songPath);
-                        info.setSongName(songName);
-                        info.setPinYin(HanZi2PinYinUtils.HanZi2PinYin(songName));
-                        info.save();
+                        List<ArtistInfo> artistInfos = DataSupport.where("name = ?", artist).find(ArtistInfo.class);
+                        if (artistInfos.size() == 0) {
+                            ArtistInfo artistInfo = new ArtistInfo();
+                            artistInfo.setName(artist);
+                            artistInfo.save();
+                        }
                     }
                 }
             }

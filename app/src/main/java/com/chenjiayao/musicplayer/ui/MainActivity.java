@@ -16,7 +16,6 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Toast;
 
 import com.chenjiayao.musicplayer.R;
@@ -41,13 +40,11 @@ public class MainActivity extends AppCompatActivity
 
         setViewPager();
         setDrawLayout();
+
         SharePreferenceUtils utils = SharePreferenceUtils.getInstance(MainActivity.this);
+
         if (utils.isFirstTimeUse()) {
-            Toast.makeText(MainActivity.this, "已过滤播放时长小于2分钟的文件", Toast.LENGTH_SHORT)
-                    .show();
             utils.setNotFirst();
-        } else {
-            Toast.makeText(MainActivity.this, "主人,欢迎回来~", Toast.LENGTH_SHORT).show();
         }
     }
 

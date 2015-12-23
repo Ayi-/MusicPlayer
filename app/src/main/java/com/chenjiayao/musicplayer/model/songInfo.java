@@ -2,60 +2,26 @@ package com.chenjiayao.musicplayer.model;
 
 import org.litepal.crud.DataSupport;
 
-import java.util.List;
+public class SongInfo extends DataSupport {
 
-/**
- * Created by chen on 2015/12/16.
- * 根据歌名和演唱者可以获得GeCiMiLyric的内容
- * 其中count,List<ResultEntity>中的aid 和 lrc有用
- */
-public class songInfo extends DataSupport {
-
-    /**
-     * 主键
-     */
     int id;
-
-    /**
-     * 歌曲名称
-     */
-    String songName;
-
-
-    /**
-     * 文件路径,播放时候使用
-     */
-    String filePath;
-    /**
-     * 演唱时长
-     */
-    int playTime;
-
-    String playTimeStr;
-
-
-    int albumId;
 
     int songId;
 
-    /**
-     * 每首歌的拼音(中文),
-     */
-    String PinYin;
+    String songName;
 
+    String albumName;
 
-    private LyricInfo lyricInfo;
-    private AlbumInfo albumInfo;
-    private artistInfo artistInfo;
+    int albumId;
 
-    public artistInfo getArtistInfo() {
-        return artistInfo;
-    }
+    String artistName;
 
+    String path;
 
-    public void setArtistInfo(artistInfo artistInfo) {
-        this.artistInfo = artistInfo;
-    }
+    String lyrcUrl;
+
+    String pinyin;
+
 
     public int getSongId() {
         return songId;
@@ -63,22 +29,6 @@ public class songInfo extends DataSupport {
 
     public void setSongId(int songId) {
         this.songId = songId;
-    }
-
-    public AlbumInfo getAlbumInfo() {
-        return albumInfo;
-    }
-
-    public void setAlbumInfo(AlbumInfo albumInfo) {
-        this.albumInfo = albumInfo;
-    }
-
-    public String getPlayTimeStr() {
-        return playTimeStr;
-    }
-
-    public void setPlayTimeStr(String playTimeStr) {
-        this.playTimeStr = playTimeStr;
     }
 
     public int getId() {
@@ -89,22 +39,37 @@ public class songInfo extends DataSupport {
         this.id = id;
     }
 
-    public String getPinYin() {
-        return PinYin;
+    public String getPinyin() {
+        return pinyin;
     }
 
-    public void setPinYin(String pinYin) {
-        PinYin = pinYin;
+    public void setPinyin(String pinyin) {
+        this.pinyin = pinyin;
     }
 
-    public LyricInfo getLyricInfo() {
-        return lyricInfo;
+    public String getLyrcUrl() {
+        return lyrcUrl;
     }
 
-    public void setLyricInfo(LyricInfo lyricInfo) {
-        this.lyricInfo = lyricInfo;
+    public void setLyrcUrl(String lyrcUrl) {
+        this.lyrcUrl = lyrcUrl;
     }
 
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    public String getArtistName() {
+        return artistName;
+    }
+
+    public void setArtistName(String artistName) {
+        this.artistName = artistName;
+    }
 
     public int getAlbumId() {
         return albumId;
@@ -114,6 +79,13 @@ public class songInfo extends DataSupport {
         this.albumId = albumId;
     }
 
+    public String getAlbumName() {
+        return albumName;
+    }
+
+    public void setAlbumName(String albumName) {
+        this.albumName = albumName;
+    }
 
     public String getSongName() {
         return songName;
@@ -122,22 +94,4 @@ public class songInfo extends DataSupport {
     public void setSongName(String songName) {
         this.songName = songName;
     }
-
-
-    public String getFilePath() {
-        return filePath;
-    }
-
-    public void setFilePath(String filePath) {
-        this.filePath = filePath;
-    }
-
-    public int getPlayTime() {
-        return playTime;
-    }
-
-    public void setPlayTime(int playTime) {
-        this.playTime = playTime;
-    }
-
 }

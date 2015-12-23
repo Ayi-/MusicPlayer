@@ -2,11 +2,11 @@
 <litepal>
     <dbname value="songInfo"></dbname>
 
-    <version value="3"></version>
+    <version value="1"></version>
 
     <list>
-        <mapping class="com.chenjiayao.musicplayer.model.songInfo"></mapping>
+        <mapping class="com.chenjiayao.musicplayer.model.SongInfo"></mapping>
+        <mapping class="com.chenjiayao.musicplayer.model.ArtistInfo"></mapping>
         <mapping class="com.chenjiayao.musicplayer.model.AlbumInfo"></mapping>
-        <mapping class="com.chenjiayao.musicplayer.model.artistInfo" />
     </list>
 </litepal>  

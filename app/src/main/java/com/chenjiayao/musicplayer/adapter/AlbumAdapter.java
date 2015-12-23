@@ -1,49 +1,51 @@
 package com.chenjiayao.musicplayer.adapter;
 
+import android.content.ContentUris;
 import android.content.Context;
-import android.support.v7.graphics.Palette;
+import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.chenjiayao.musicplayer.R;
 import com.chenjiayao.musicplayer.model.AlbumInfo;
-import com.chenjiayao.musicplayer.utils.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
 import java.util.List;
 
 /**
- * Created by chen on 2015/12/18.
+ * Created by chen on 2015/12/19.
  */
 public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.MyViewHolder> {
 
-    private static final String TAG = "AlbumAdapter";
-    private Context context;
-    private LayoutInflater inflater;
-    private List<AlbumInfo> infos;
-    private final ImageLoader imageLoader;
+    List<AlbumInfo> albumInfos;
+    Context context;
+    LayoutInflater inflater;
+    ImageLoader imageLoader;
+    Uri artistUri = Uri.parse("content://media/external/audio/albumart");
 
-    public interface onClickListener {
-        void onClick(int pos, View v);
+
+    public interface onItemClickListener {
+        void onItemClick(int pos, View view);
     }
 
-    public onClickListener listener;
+    public onItemClickListener listener;
 
-    public void setListener(onClickListener listener) {
+    public void setListener(onItemClickListener listener) {
         this.listener = listener;
     }
 
-    public AlbumAdapter(Context context, List<AlbumInfo> infos) {
-        this.context = context;
-        this.infos = infos;
-        inflater = LayoutInflater.from(context);
-        imageLoader = ImageLoader.build(context);
 
+    public AlbumAdapter(List<AlbumInfo> albumInfos, Context context) {
+        this.albumInfos = albumInfos;
+        this.context = context;
+        inflater = LayoutInflater.from(context);
+        imageLoader = ImageLoader.getInstance();
+        imageLoader.init(ImageLoaderConfiguration.createDefault(context));
     }
 
     @Override
@@ -53,44 +55,39 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.MyViewHolder
         return holder;
     }
 
-    //这个函数里面不要太复杂!!!
     @Override
     public void onBindViewHolder(MyViewHolder holder, int position) {
-        AlbumInfo info = infos.get(position);
-        holder.albumName.setText(info.getAlbumName());
-        imageLoader.bindBitmap(info.getSongId(), info.getAlbumId(),
-                holder.albumPicture, holder.albumPicture.getWidth(), holder.albumPicture.getHeight());
-        holder.albumArtist.setText(info.getArtist());
+        AlbumInfo albumInfo = albumInfos.get(position);
+        holder.albumName.setText(albumInfo.getName());
+        Uri uri = ContentUris.withAppendedId(artistUri, albumInfo.getAlbumId());
+        imageLoader.displayImage(String.valueOf(uri), holder.album);
+
         holder.itemView.setTag(position);
+
     }
 
     @Override
     public int getItemCount() {
-        return infos.size();
+        return albumInfos.size();
     }
 
     public class MyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        ImageView albumPicture;
         TextView albumName;
-        TextView albumArtist;
-        LinearLayout layout;
+        ImageView album;
 
         public MyViewHolder(View itemView) {
             super(itemView);
-            albumArtist = (TextView) itemView.findViewById(R.id.album_artist);
             albumName = (TextView) itemView.findViewById(R.id.album_name);
-            albumPicture = (ImageView) itemView.findViewById(R.id.album_picture);
-            layout = (LinearLayout) itemView.findViewById(R.id.album_info);
+            album = (ImageView) itemView.findViewById(R.id.album_picture);
             itemView.setOnClickListener(this);
         }
-
 
         @Override
         public void onClick(View v) {
             if (listener != null) {
                 int pos = (int) v.getTag();
-                listener.onClick(pos, v);
+                listener.onItemClick(pos, v);
             }
         }
     }

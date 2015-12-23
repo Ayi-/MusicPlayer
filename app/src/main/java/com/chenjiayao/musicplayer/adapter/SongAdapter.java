@@ -1,7 +1,9 @@
 package com.chenjiayao.musicplayer.adapter;
 
+import android.content.ContentUris;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -12,11 +14,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.chenjiayao.musicplayer.R;
-import com.chenjiayao.musicplayer.model.artistInfo;
-import com.chenjiayao.musicplayer.model.songInfo;
-import com.chenjiayao.musicplayer.utils.ImageLoader;
+import com.chenjiayao.musicplayer.model.SongInfo;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+
 
 import java.util.List;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * Created by chen on 2015/12/16.
@@ -25,8 +30,10 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
 
     private Context context;
     private LayoutInflater inflater;
-    private List<songInfo> list;
-    private ImageLoader imageLoader;
+    private List<SongInfo> list;
+    Uri artistUri = Uri.parse("content://media/external/audio/albumart");
+    ImageLoader imageLoader = ImageLoader.getInstance();
+
 
     public interface onItemClickListener {
         void onItemClick(int pos, View view);
@@ -38,10 +45,10 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
         this.listener = listener;
     }
 
-    public SongAdapter(Context context, List<songInfo> list) {
+    public SongAdapter(Context context, List<SongInfo> list) {
         this.context = context;
-        imageLoader = ImageLoader.build(context);
         this.list = list;
+        imageLoader.init(ImageLoaderConfiguration.createDefault(context));
         inflater = LayoutInflater.from(context);
     }
 
@@ -54,15 +61,14 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
 
     @Override
     public void onBindViewHolder(MyViewHolder holder, int position) {
-        songInfo info = list.get(position);
 
-        holder.songName.setText(info.getSongName());
-        holder.singer.setText(info.getArtistInfo().getName());
+        SongInfo songInfo = list.get(position);
+        Uri uri = ContentUris.withAppendedId(artistUri, songInfo.getAlbumId());
+        imageLoader.displayImage(String.valueOf(uri), holder.songIcon);
         holder.itemView.setTag(position);
+        holder.songName.setText(songInfo.getSongName());
+        holder.singer.setText(songInfo.getArtistName());
 
-        imageLoader.bindBitmap(info.getSongId(), info.getAlbumId(),
-                holder.songIcon, holder.songIcon.getMeasuredWidth(),
-                holder.songIcon.getMeasuredHeight());
     }
 
     @Override
@@ -81,7 +87,6 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
             songName = (TextView) itemView.findViewById(R.id.song_name);
             singer = (TextView) itemView.findViewById(R.id.song_artist);
             songIcon = (ImageView) itemView.findViewById(R.id.song_icon);
-
             itemView.setOnClickListener(this);
         }
 

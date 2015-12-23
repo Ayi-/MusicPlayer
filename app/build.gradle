@@ -34,4 +34,5 @@ dependencies {
     compile files('libs/pinyin4j-2.5.0.jar')
     compile 'com.android.support:palette-v7:23.1.1'
     compile 'com.github.iammert:MusicPlayerView:e3b937c729'
+    compile 'com.nostra13.universalimageloader:universal-image-loader:1.9.5'
 }

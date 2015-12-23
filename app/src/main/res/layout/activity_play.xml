@@ -9,5 +9,9 @@
         app:textSize="14sp"
         android:layout_centerInParent="true"
         android:layout_width="250dp"
+        app:textColor = "#80FFFFFF"
+        app:buttonColor = "#FF0028"
+        app:progressLoadedColor = "#00815E"
+        app:progressEmptyColor = "#20FFFFFF"
         android:layout_height="250dp" />
 </RelativeLayout>
