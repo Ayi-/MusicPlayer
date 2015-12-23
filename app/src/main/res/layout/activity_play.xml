@@ -22,24 +22,50 @@
 
 
     <LinearLayout
-        android:gravity="center_horizontal"
         android:layout_width="match_parent"
-        android:orientation="vertical"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
 
-        <TextView
+
+        <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="青花瓷"
-            android:textColor="@android:color/white"
-            android:textSize="25sp"/>
-        <TextView
+            android:layout_weight="1"
+            android:src="@mipmap/ic_snooze_white_36dp" />
+
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="青花瓷"
+                android:textColor="@android:color/white"
+                android:textSize="25sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="5dp"
+                android:text="周杰伦"
+                android:textColor="@android:color/white"
+                android:textSize="15sp" />
+
+
+        </LinearLayout>
+
+        <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="周杰伦"
-            android:layout_marginTop="5dp"
-            android:textSize="20sp"
-            android:textColor="@android:color/white"/>
+            android:layout_weight="1"
+            android:src="@mipmap/ic_shuffle_white_36dp" />
     </LinearLayout>
 
     <RelativeLayout
@@ -49,26 +75,26 @@
 
 
         <ImageView
-            android:layout_centerVertical="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@mipmap/ic_skip_previous_grey300_36dp"
-            android:layout_marginLeft="30dp"/>
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="30dp"
+            android:src="@mipmap/ic_skip_previous_grey300_36dp" />
 
 
-        <jp.co.recruit_lifestyle.android.widget.PlayPauseButton
+        <android.support.design.widget.FloatingActionButton
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:background="@color/colorPrimary"
-            android:layout_centerInParent="true"/>
+            android:layout_centerInParent="true"
+            android:background="@color/colorPrimary" />
 
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
-            android:layout_marginRight="30dp"
             android:layout_centerVertical="true"
-            android:src="@mipmap/ic_skip_next_grey300_36dp"/>
+            android:layout_marginRight="30dp"
+            android:src="@mipmap/ic_skip_next_grey300_36dp" />
 
     </RelativeLayout>
 

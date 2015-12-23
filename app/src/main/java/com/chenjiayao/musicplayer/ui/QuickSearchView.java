@@ -11,15 +11,14 @@ import android.view.MotionEvent;
 import android.view.View;
 
 
-
 /**
  * Created by chen on 2015/12/17.
  */
 public class QuickSearchView extends View {
 
     String[] letter = new String[]{
-            "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N",
-            "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "#"
+            "#", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N",
+            "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"
     };
     Context context;
     private Paint paint;
