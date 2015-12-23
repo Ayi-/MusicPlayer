@@ -21,7 +21,6 @@ import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
 
 import java.util.List;
-import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * Created by chen on 2015/12/16.

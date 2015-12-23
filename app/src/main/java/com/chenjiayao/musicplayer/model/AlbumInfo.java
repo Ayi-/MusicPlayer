@@ -9,6 +9,16 @@ public class AlbumInfo extends DataSupport {
 
     int albumId;
     String name;
+    int color;
+
+
+    public int getColor() {
+        return color;
+    }
+
+    public void setColor(int color) {
+        this.color = color;
+    }
 
 
     public int getAlbumId() {

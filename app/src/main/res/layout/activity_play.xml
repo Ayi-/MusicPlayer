@@ -1,17 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:background="#1F0F1F"
+    android:orientation="vertical">
 
-    <co.mobiwise.library.MusicPlayerView
-        android:id="@+id/mpv"
-        app:textSize="14sp"
-        android:layout_centerInParent="true"
-        android:layout_width="250dp"
-        app:textColor = "#80FFFFFF"
-        app:buttonColor = "#FF0028"
-        app:progressLoadedColor = "#00815E"
-        app:progressEmptyColor = "#20FFFFFF"
-        android:layout_height="250dp" />
-</RelativeLayout>
+    <co.mobiwise.library.MaskProgressView
+        android:layout_width="match_parent"
+        android:layout_height="400dp"
+        app:coverImage="@mipmap/ic_launcher"
+        app:coverMaskColor="#80000000"
+        app:currentProgress="23"
+        app:durationTextColor="#FFFFFF"
+        app:durationTextSize="15sp"
+        app:maxProgress="40"
+        app:placeHolder="@mipmap/ic_launcher"
+        app:progressEmptyColor="#4E3C51"
+        app:progressHeight="4dp"
+        app:progressLoadedColor="#E91E64" />
+
+
+    <LinearLayout
+        android:gravity="center_horizontal"
+        android:layout_width="match_parent"
+        android:orientation="vertical"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="青花瓷"
+            android:textColor="@android:color/white"
+            android:textSize="25sp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="周杰伦"
+            android:layout_marginTop="5dp"
+            android:textSize="20sp"
+            android:textColor="@android:color/white"/>
+    </LinearLayout>
+
+    <RelativeLayout
+
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+
+        <ImageView
+            android:layout_centerVertical="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@mipmap/ic_skip_previous_grey300_36dp"
+            android:layout_marginLeft="30dp"/>
+
+
+        <jp.co.recruit_lifestyle.android.widget.PlayPauseButton
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="@color/colorPrimary"
+            android:layout_centerInParent="true"/>
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="30dp"
+            android:layout_centerVertical="true"
+            android:src="@mipmap/ic_skip_next_grey300_36dp"/>
+
+    </RelativeLayout>
+
+</LinearLayout>

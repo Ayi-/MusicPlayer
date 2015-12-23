@@ -2,18 +2,24 @@ package com.chenjiayao.musicplayer.adapter;
 
 import android.content.ContentUris;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.net.Uri;
+import android.support.v7.graphics.Palette;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.chenjiayao.musicplayer.R;
 import com.chenjiayao.musicplayer.model.AlbumInfo;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.nostra13.universalimageloader.core.assist.FailReason;
+import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 
 import java.util.List;
 
@@ -56,11 +62,41 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.MyViewHolder
     }
 
     @Override
-    public void onBindViewHolder(MyViewHolder holder, int position) {
-        AlbumInfo albumInfo = albumInfos.get(position);
+    public void onBindViewHolder(final MyViewHolder holder, final int position) {
+        final AlbumInfo albumInfo = albumInfos.get(position);
         holder.albumName.setText(albumInfo.getName());
         Uri uri = ContentUris.withAppendedId(artistUri, albumInfo.getAlbumId());
-        imageLoader.displayImage(String.valueOf(uri), holder.album);
+        imageLoader.displayImage(String.valueOf(uri), holder.album,
+                new ImageLoadingListener() {
+                    @Override
+                    public void onLoadingStarted(String imageUri, View view) {
+
+                    }
+
+                    @Override
+                    public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
+
+                    }
+
+                    @Override
+                    public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+
+                        new Palette.Builder(loadedImage).generate(new Palette.PaletteAsyncListener() {
+                            @Override
+                            public void onGenerated(Palette palette) {
+                                int color = palette.getVibrantColor(Color.parseColor("#66000000"));
+                                holder.layout.setBackgroundColor(color);
+//                                albumInfo.setColor(color);
+//                                albumInfo.save();
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onLoadingCancelled(String imageUri, View view) {
+
+                    }
+                });
 
         holder.itemView.setTag(position);
 
@@ -75,11 +111,13 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.MyViewHolder
 
         TextView albumName;
         ImageView album;
+        LinearLayout layout;
 
         public MyViewHolder(View itemView) {
             super(itemView);
             albumName = (TextView) itemView.findViewById(R.id.album_name);
             album = (ImageView) itemView.findViewById(R.id.album_picture);
+            layout = (LinearLayout) itemView.findViewById(R.id.layout);
             itemView.setOnClickListener(this);
         }
 

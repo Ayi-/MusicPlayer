@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import com.chenjiayao.musicplayer.R;
 import com.chenjiayao.musicplayer.adapter.AlbumAdapter;
 import com.chenjiayao.musicplayer.model.AlbumInfo;
+import com.chenjiayao.musicplayer.ui.ArtistActivity;
 
 import org.litepal.crud.DataSupport;
 

@@ -8,16 +8,14 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.style.ForegroundColorSpan;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.chenjiayao.musicplayer.R;
 import com.chenjiayao.musicplayer.adapter.ArtistAdapter;
-import com.chenjiayao.musicplayer.adapter.SongAdapter;
 import com.chenjiayao.musicplayer.model.ArtistInfo;
+import com.chenjiayao.musicplayer.ui.ArtistActivity;
 
 import org.litepal.crud.DataSupport;
 

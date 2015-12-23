@@ -22,7 +22,8 @@
         </activity>
 
         <activity android:name=".ui.MainActivity" />
-        <activity android:name=".ui.fragment.ArtistActivity"/>
+        <activity android:name=".ui.ArtistActivity"/>
+        <activity android:name=".ui.PlayActivity"/>
     </application>
 
 </manifest>

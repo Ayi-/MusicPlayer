@@ -11,6 +11,7 @@ public class ArtistInfo extends DataSupport{
 
     int id;
 
+
     public String getName() {
         return name;
     }

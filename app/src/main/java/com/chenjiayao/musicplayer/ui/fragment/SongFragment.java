@@ -1,6 +1,7 @@
 package com.chenjiayao.musicplayer.ui.fragment;
 
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -14,6 +15,8 @@ import android.view.ViewGroup;
 import com.chenjiayao.musicplayer.R;
 import com.chenjiayao.musicplayer.adapter.SongAdapter;
 import com.chenjiayao.musicplayer.model.SongInfo;
+import com.chenjiayao.musicplayer.ui.ArtistActivity;
+import com.chenjiayao.musicplayer.ui.PlayActivity;
 import com.chenjiayao.musicplayer.ui.QuickSearchView;
 
 
@@ -72,13 +75,10 @@ public class SongFragment extends Fragment {
         adapter.setListener(new SongAdapter.onItemClickListener() {
             @Override
             public void onItemClick(int pos, View view) {
-                lastPos = pos;
-                beginPlay(pos);
+                Intent intent = new Intent(getActivity(), PlayActivity.class);
+                startActivity(intent);
             }
         });
     }
 
-    private void beginPlay(int pos) {
-
-    }
 }
