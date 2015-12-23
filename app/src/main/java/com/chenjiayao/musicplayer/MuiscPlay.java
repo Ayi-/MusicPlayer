@@ -10,4 +10,9 @@ import java.util.List;
 public class MuiscPlay {
 
     List<SongInfo> infos;
+
+    boolean isPlaying = false;
+
+
+    
 }
