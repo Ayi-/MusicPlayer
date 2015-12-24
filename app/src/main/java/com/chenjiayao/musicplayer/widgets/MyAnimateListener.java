@@ -1,4 +1,4 @@
-package com.chenjiayao.musicplayer.ui;
+package com.chenjiayao.musicplayer.widgets;
 
 import android.animation.Animator;
 

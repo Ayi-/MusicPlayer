@@ -8,20 +8,23 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.chenjiayao.musicplayer.R;
 import com.chenjiayao.musicplayer.adapter.SongAdapter;
+import com.chenjiayao.musicplayer.model.PlayList;
 import com.chenjiayao.musicplayer.model.SongInfo;
-import com.chenjiayao.musicplayer.ui.ArtistActivity;
 import com.chenjiayao.musicplayer.ui.PlayActivity;
-import com.chenjiayao.musicplayer.ui.QuickSearchView;
+import com.chenjiayao.musicplayer.utils.ToastUtils;
+import com.chenjiayao.musicplayer.widgets.QuickSearchView;
 
 
 import org.litepal.crud.DataSupport;
 
+import java.security.Policy;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,7 +40,7 @@ public class SongFragment extends Fragment {
     private LinearLayoutManager manager;
     private QuickSearchView searchView;
     List<SongInfo> songInfos;
-    int lastPos = -1;
+
 
     @Nullable
     @Override
@@ -45,7 +48,7 @@ public class SongFragment extends Fragment {
         return view;
     }
 
-    //先与onCreateView调用
+    //onCreateView先调用
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,10 +60,31 @@ public class SongFragment extends Fragment {
 
         setRecyclerView();
 
+        //快速索引
         searchView.setListener(new QuickSearchView.onTouchListener() {
             @Override
             public void onTouch(String s) {
+                for (int i = 0; i < songInfos.size(); i++) {
+                    String pinyin = songInfos.get(i).getPinyin();
+                    if (s.equals(pinyin.substring(0, 1))) {
+                        ToastUtils.showToast(getActivity(), s);
+                        //开始滚动到相应位置
+                        int first = manager.findFirstVisibleItemPosition();
+                        int last = manager.findLastVisibleItemPosition();
 
+                        if (i <= first) {
+                            manager.scrollToPosition(i);
+                        } else if (i >= last) {
+                            manager.scrollToPosition(i);
+//                            int top = recyclerView.getChildAt(i - first).getTop();
+//                            recyclerView.scrollBy(0, top);
+                        } else {
+                            int top = recyclerView.getChildAt(i - first).getTop();
+                            recyclerView.scrollBy(0, top);
+                        }
+                        break;
+                    }
+                }
             }
         });
     }
@@ -77,6 +101,8 @@ public class SongFragment extends Fragment {
             public void onItemClick(int pos, View view) {
                 Intent intent = new Intent(getActivity(), PlayActivity.class);
                 startActivity(intent);
+                PlayList list = PlayList.getInstance(getActivity());
+                list.addToList(songInfos, pos);
             }
         });
     }

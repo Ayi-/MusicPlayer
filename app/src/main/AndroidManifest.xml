@@ -4,6 +4,7 @@
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:name="org.litepal.LitePalApplication"
         android:allowBackup="true"
@@ -22,7 +23,7 @@
         </activity>
 
         <activity android:name=".ui.MainActivity" />
-        <activity android:name=".ui.ArtistActivity"/>
+        <activity android:name=".ui.DetailActivity"/>
         <activity android:name=".ui.PlayActivity"/>
     </application>
 

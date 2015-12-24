@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:orientation="horizontal">
 
-    <com.chenjiayao.musicplayer.ui.QuickSearchView
+    <com.chenjiayao.musicplayer.widgets.QuickSearchView
         android:id="@+id/indicator"
         android:layout_width="25dp"
         android:layout_height="match_parent"
@@ -12,7 +12,7 @@
         android:background="#94C4BC"
         android:orientation="vertical">
 
-    </com.chenjiayao.musicplayer.ui.QuickSearchView>
+    </com.chenjiayao.musicplayer.widgets.QuickSearchView>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recycler_view"

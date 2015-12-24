@@ -1,111 +1,131 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#1F0F1F"
     android:orientation="vertical">
 
-    <co.mobiwise.library.MaskProgressView
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="400dp"
-        app:coverImage="@mipmap/ic_launcher"
-        app:coverMaskColor="#80000000"
-        app:currentProgress="23"
-        app:durationTextColor="#FFFFFF"
-        app:durationTextSize="15sp"
-        app:maxProgress="40"
-        app:placeHolder="@mipmap/ic_launcher"
-        app:progressEmptyColor="#4E3C51"
-        app:progressHeight="4dp"
-        app:progressLoadedColor="#E91E64" />
-
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:clickable="true"
-            android:src="@mipmap/ic_snooze_white_36dp" />
-
-
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical">
-
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:text="青花瓷"
-                android:textColor="@android:color/white"
-                android:textSize="25sp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="5dp"
-                android:text="周杰伦"
-                android:textColor="@android:color/white"
-                android:textSize="15sp" />
-
-
-        </LinearLayout>
-
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:clickable="true"
-            android:src="@mipmap/ic_shuffle_white_36dp" />
-    </LinearLayout>
+        android:layout_height="?attr/actionBarSize"
+        android:layout_gravity="top"
+        android:background="@android:color/transparent"
+        android:theme="@style/Theme.AppCompat"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
     <RelativeLayout
+        android:layout_width="350dp"
+        android:layout_height="350dp"
+        android:layout_gravity="center_horizontal">
 
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_centerInParent="true"
+            android:layout_gravity="center"
+            android:background="@android:color/transparent">
+
+            <com.chenjiayao.musicplayer.widgets.CircleImageView
+                android:id="@+id/album_art"
+                android:layout_width="320dp"
+                android:layout_height="320dp"
+                android:layout_centerInParent="true"
+                android:layout_gravity="center"
+                android:background="@android:color/transparent"
+                android:clickable="true"
+                android:scaleType="centerCrop" />
+        </FrameLayout>
+
+        <com.chenjiayao.musicplayer.widgets.CircularSeekBar
+            android:id="@+id/song_progress_circular"
+            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_centerInParent="true"
+            android:layout_gravity="center"
+            android:background="@android:color/transparent"
+            android:maxHeight="1dp"
+            android:progress="30"
+            app:circle_color="#33000000"
+            app:pointer_color="#0174DF"
+            app:pointer_halo_color="#880174DF" />
+
+        <FrameLayout
+            android:id="@+id/lyric_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clickable="true"
+            android:visibility="invisible">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </FrameLayout>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_marginTop="10dp"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
+        android:layout_height="wrap_content">
 
         <ImageView
+            android:id="@+id/timer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="30dp"
-            android:clickable="true"
-            android:src="@mipmap/ic_skip_previous_grey300_36dp" />
+            android:layout_marginLeft="50dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@mipmap/ic_snooze_white_36dp" />
 
-
-        <RelativeLayout
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_centerInParent="true"
-            android:background="@drawable/button_bg">
-
-            <jp.co.recruit_lifestyle.android.widget.PlayPauseButton
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:layout_centerInParent="true" />
-        </RelativeLayout>
 
         <ImageView
+            android:id="@+id/shuffle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:layout_marginRight="30dp"
-            android:clickable="true"
-            android:src="@mipmap/ic_skip_next_grey300_36dp" />
+            android:layout_marginRight="50dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@mipmap/ic_repeat_white_36dp" />
 
+    </RelativeLayout>
+
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp">
+
+        <ImageView
+            android:id="@+id/previous"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@mipmap/ic_skip_previous_grey300_36dp" />
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:src="@mipmap/ic_play_arrow_white_36dp" />
+
+
+        <ImageView
+            android:id="@+id/next"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@mipmap/ic_skip_next_grey300_36dp" />
     </RelativeLayout>
 
 </LinearLayout>

@@ -15,7 +15,9 @@ import com.chenjiayao.musicplayer.R;
 import com.chenjiayao.musicplayer.model.AlbumInfo;
 import com.chenjiayao.musicplayer.model.ArtistInfo;
 import com.chenjiayao.musicplayer.model.SongInfo;
+import com.chenjiayao.musicplayer.utils.HanZi2PinYinUtils;
 import com.chenjiayao.musicplayer.utils.SharePreferenceUtils;
+import com.chenjiayao.musicplayer.widgets.MyAnimateListener;
 
 import org.litepal.crud.DataSupport;
 
@@ -105,6 +107,7 @@ public class SplashActivity extends AppCompatActivity {
                         info.setAlbumName(album);
                         info.setAlbumId(albumId);
                         info.setArtistName(artist);
+                        info.setPinyin(HanZi2PinYinUtils.HanZi2PinYin(songName));
                         info.setSongId(id);
                         info.save();
 

@@ -1,8 +1,4 @@
-package com.chenjiayao.musicplayer.ui;
-
-/**
- * Created by chen on 2015/12/23.
- */
+package com.chenjiayao.musicplayer.widgets;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -302,4 +298,3 @@ public class CircleImageView extends ImageView {
     }
 
 }
-

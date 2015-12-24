@@ -10,13 +10,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 
 import com.chenjiayao.musicplayer.R;
 import com.chenjiayao.musicplayer.adapter.SongAdapter;
+import com.chenjiayao.musicplayer.model.PlayList;
 import com.chenjiayao.musicplayer.model.SongInfo;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
@@ -28,7 +28,7 @@ import java.util.List;
 /**
  * Created by chen on 2015/12/19.
  */
-public class ArtistActivity extends AppCompatActivity implements View.OnClickListener {
+public class DetailActivity extends AppCompatActivity implements View.OnClickListener {
 
     private RecyclerView recyclerView;
     private Toolbar toolbar;
@@ -38,6 +38,7 @@ public class ArtistActivity extends AppCompatActivity implements View.OnClickLis
     private Uri uri;
     FloatingActionButton fab;
     CollapsingToolbarLayout collapsingToolbarLayout;
+     List<SongInfo> songInfos;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,12 +57,14 @@ public class ArtistActivity extends AppCompatActivity implements View.OnClickLis
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
 
-        LinearLayoutManager manager = new LinearLayoutManager(ArtistActivity.this,
+        LinearLayoutManager manager = new LinearLayoutManager(DetailActivity.this,
                 LinearLayoutManager.VERTICAL, false);
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+
         Intent intent = getIntent();
         String name = intent.getStringExtra("name");
-        List<SongInfo> songInfos;
+
+
         if (name != null) {
             songInfos = DataSupport.where("artistname = ?", name).find(SongInfo.class);
             collapsingToolbarLayout.setTitle(songInfos.get(0).getArtistName());
@@ -70,18 +73,23 @@ public class ArtistActivity extends AppCompatActivity implements View.OnClickLis
             songInfos = DataSupport.where("albumname = ?", album).find(SongInfo.class);
             collapsingToolbarLayout.setTitle(songInfos.get(0).getAlbumName());
         }
+
         uri = ContentUris.withAppendedId(artistUri, songInfos.get(0).getAlbumId());
         imageLoader.displayImage(String.valueOf(uri), imageView);
 
-        SongAdapter adapter = new SongAdapter(ArtistActivity.this, songInfos);
+        SongAdapter adapter = new SongAdapter(DetailActivity.this, songInfos);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(manager);
 
         adapter.setListener(new SongAdapter.onItemClickListener() {
             @Override
             public void onItemClick(int pos, View view) {
-                Intent playIntent = new Intent(ArtistActivity.this, PlayActivity.class);
+                Intent playIntent = new Intent(DetailActivity.this, PlayActivity.class);
                 startActivity(playIntent);
+
+                //添加到播放列表
+                PlayList list = PlayList.getInstance(DetailActivity.this);
+                list.addToList(songInfos, pos);
             }
         });
     }
@@ -100,7 +108,10 @@ public class ArtistActivity extends AppCompatActivity implements View.OnClickLis
 
     @Override
     public void onClick(View v) {
-        Intent intent = new Intent(ArtistActivity.this, PlayActivity.class);
+        Intent intent = new Intent(DetailActivity.this, PlayActivity.class);
         startActivity(intent);
+
+        PlayList list = PlayList.getInstance(DetailActivity.this);
+        list.addToList(songInfos, 0);
     }
 }

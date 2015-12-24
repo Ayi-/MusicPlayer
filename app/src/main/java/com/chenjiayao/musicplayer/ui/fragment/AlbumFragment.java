@@ -14,7 +14,7 @@ import android.view.ViewGroup;
 import com.chenjiayao.musicplayer.R;
 import com.chenjiayao.musicplayer.adapter.AlbumAdapter;
 import com.chenjiayao.musicplayer.model.AlbumInfo;
-import com.chenjiayao.musicplayer.ui.ArtistActivity;
+import com.chenjiayao.musicplayer.ui.DetailActivity;
 
 import org.litepal.crud.DataSupport;
 
@@ -56,9 +56,11 @@ public class AlbumFragment extends Fragment {
         adapter.setListener(new AlbumAdapter.onItemClickListener() {
             @Override
             public void onItemClick(int pos, View view) {
-                Intent intent = new Intent(getActivity(), ArtistActivity.class);
+                Intent intent = new Intent(getActivity(), DetailActivity.class);
                 intent.putExtra("album", albumInfos.get(pos).getName());
                 startActivity(intent);
+
+
             }
         });
     }

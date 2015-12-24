@@ -38,4 +38,24 @@ public class SharePreferenceUtils {
         editor.putBoolean("firstTime", false);
         editor.commit();
     }
+
+    public void setTimeToLeft(int time) {
+        editor.putInt("timeToLeave", time);
+        editor.commit();
+    }
+
+    public int getLeaveTime() {
+        int res = preferences.getInt("timeToLeave", -1);
+        return res;
+    }
+
+    public void setPlayMode(int mode) {
+        editor.putInt("playMode", mode);
+        editor.commit();
+    }
+
+    public int getPlayMode() {
+        int res = preferences.getInt("playMode", 0);
+        return res;
+    }
 }
