@@ -9,22 +9,17 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.support.annotation.Nullable;
-import android.support.v7.graphics.Palette;
-import android.support.v7.widget.LinearLayoutManager;
-import android.util.Log;
 
-import com.chenjiayao.musicplayer.adapter.AlbumAdapter;
 import com.chenjiayao.musicplayer.constant;
 import com.chenjiayao.musicplayer.model.PlayList;
 import com.chenjiayao.musicplayer.model.SongInfo;
 
-import java.io.IOException;
-
 /**
  * Created by chen on 2015/12/24.
  */
-public class MusicPlayer extends Service {
+public class MusicPlayer extends Service implements MediaPlayer.OnCompletionListener {
 
 
     private MyBindler binder;
@@ -32,6 +27,7 @@ public class MusicPlayer extends Service {
     private MediaPlayer player;
     private ProgressReceiver progressReceiver;
     private PlayList list;
+    private SongInfo currentInfo;
 
 
     @Nullable
@@ -46,29 +42,38 @@ public class MusicPlayer extends Service {
         return super.onStartCommand(intent, flags, startId);
     }
 
+
+    //发送广播,更新进度条
+    Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+            Intent intent = new Intent();
+            intent.setAction(constant.FILTER + ".service.progress");
+            intent.putExtra("progress", player.getCurrentPosition());
+            sendBroadcast(intent);
+            handler.postDelayed(this, 1000);
+        }
+    };
+
     void startPlayService(SongInfo info) {
 
-        //发送广播,更新进度条
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                Intent intent = new Intent();
-                intent.setAction(constant.FILTER + ".service.progress");
-                intent.putExtra("progress", player.getCurrentPosition() / 1000);
-                sendBroadcast(intent);
-                handler.postDelayed(this, 1000);
+        if (currentInfo != null) {
+            if (list.isPlaying() && !currentInfo.getSongName().equals(info.getSongName())) {
+                player.reset();
             }
-        };
+        }
         handler.postDelayed(runnable, 1000);
-
         player.setAudioStreamType(AudioManager.STREAM_MUSIC);
         try {
-            player.prepare();
+            currentInfo = info;
             player.setDataSource(info.getPath());
+            player.prepare();
             player.start();
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+
     }
 
     @Override
@@ -77,6 +82,8 @@ public class MusicPlayer extends Service {
         player = new MediaPlayer();
         binder = new PlayBinder();
         list = PlayList.getInstance(getApplicationContext());
+
+        player.setOnCompletionListener(this);
 
         //接收广播
         progressReceiver = new ProgressReceiver();
@@ -92,6 +99,15 @@ public class MusicPlayer extends Service {
     }
 
 
+    @Override
+    public void onCompletion(MediaPlayer mp) {
+        binder.next();
+        Intent intent = new Intent();
+        intent.setAction("com.chenjiayao.musicplayer.next");
+        sendBroadcast(intent);
+    }
+
+
     ///////////////////////////////////
     class PlayBinder extends MyBindler {
 
@@ -99,14 +115,16 @@ public class MusicPlayer extends Service {
         public void next() {
             player.reset();
             SongInfo info = list.getNext();
-            startPlayService(info);
+            currentInfo = info;
+            startPlayService(currentInfo);
         }
 
         @Override
         public void previous() {
             player.reset();
             SongInfo info = list.getPrevious();
-            startPlayService(info);
+            currentInfo = info;
+            startPlayService(currentInfo);
         }
 
 
@@ -123,16 +141,6 @@ public class MusicPlayer extends Service {
             player.start();
             list.setIsPlaying(true);
 
-            Runnable runnable = new Runnable() {
-                @Override
-                public void run() {
-                    Intent intent = new Intent();
-                    intent.setAction(constant.FILTER + ".service.progress");
-                    intent.putExtra("progress", player.getCurrentPosition() / 1000);
-                    sendBroadcast(intent);
-                    handler.postDelayed(this, 1000);
-                }
-            };
             handler.postDelayed(runnable, 0);
         }
     }
@@ -143,6 +151,7 @@ public class MusicPlayer extends Service {
 
         @Override
         public void onReceive(Context context, Intent intent) {
+
             int progress = intent.getIntExtra("progress", 0);
             player.seekTo(progress);
         }

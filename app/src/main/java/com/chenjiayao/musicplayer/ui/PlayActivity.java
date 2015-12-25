@@ -19,6 +19,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.Toolbar;
+import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -71,7 +72,18 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
     ImageLoader imageLoader = ImageLoader.getInstance();
     private MyBindler binder;
 
-    private ServiceConnection con;
+    private ServiceConnection con = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            binder = (MyBindler) service;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+
+        }
+    };
+    private NextReceiver nextReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,17 +92,6 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
 
         init();
 
-        con = new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder service) {
-                binder = (MyBindler) service;
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName name) {
-
-            }
-        };
 
         list = PlayList.getInstance(PlayActivity.this);
         list.setIsPlaying(true);
@@ -100,26 +101,29 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         setImage(list.getCurrentSong());
 
         bindService();
+        loadLyric();
+
+
+    }
+
+    //加载歌词
+    private void loadLyric() {
+
     }
 
     private void bindService() {
 
         //服务如果不存在就开启,不然就直接绑定
         if (!isWorked(MusicPlayer.class.getName())) {
-            startService();
+            Intent startIntent = new Intent(this, MusicPlayer.class);
+            startService(startIntent);
         }
 
         Intent bindIntent = new Intent(this, MusicPlayer.class);
         bindService(bindIntent, con, 0);
     }
 
-    private void startService() {
-        Intent startIntent = new Intent(this, MusicPlayer.class);
-        startService(startIntent);
-    }
-
     boolean isWorked(String className) {
-        Log.i("TAG", className);
         ActivityManager manager = (ActivityManager) getApplicationContext()
                 .getSystemService(Context.ACTIVITY_SERVICE);
 
@@ -130,7 +134,6 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         for (int i = 0; i < services.size(); i++) {
-            Log.i("TAG", services.get(i).service.getClassName());
             if (services.get(i).service.getClassName().equals(className)) {
                 res = true;
 
@@ -168,6 +171,10 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         filter.addAction(constant.FILTER + ".service.progress");
         registerReceiver(progressReceiver, filter);
 
+        nextReceiver = new NextReceiver();
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction("com.chenjiayao.musicplayer.next");
+        registerReceiver(nextReceiver, intentFilter);
     }
 
     @Override
@@ -184,6 +191,7 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
                 artistConver.setVisibility(View.VISIBLE);
                 break;
             case R.id.previous:     //上一首
+                previousUI();
                 break;
             case R.id.timer:      //定时退出
                 showDialog();
@@ -198,6 +206,13 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    private void previousUI() {
+        binder.previous();
+        SongInfo info = list.getCurrentSong();
+        setImage(info);
+        seekBar.setMax(currentSong.getDuration());
+    }
+
 
     private void control() {
         if (list.isPlaying()) {
@@ -209,11 +224,12 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+
     private void nextUI() {
         binder.next();
         SongInfo info = list.getCurrentSong();
         setImage(info);
-        seekBar.setMax(0);
+        seekBar.setMax(currentSong.getDuration());
     }
 
 
@@ -225,6 +241,8 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         currentSong = song;
+        seekBar.setMax(currentSong.getDuration());
+
         Uri uri = ContentUris.withAppendedId(artistUri, song.getAlbumId());
         imageLoader.displayImage(String.valueOf(uri), artistConver, new ImageLoadingListener() {
             @Override
@@ -268,11 +286,11 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         int mode = utils.getPlayMode();
         switch (mode) {
             case 0:
-                shuffle.setImageResource(R.mipmap.ic_repeat_one_white_36dp);
+                shuffle.setImageResource(R.mipmap.ic_shuffle_white_36dp);
                 mode += 1;
                 break;
             case 1:
-                shuffle.setImageResource(R.mipmap.ic_shuffle_white_36dp);
+                shuffle.setImageResource(R.mipmap.ic_repeat_one_white_36dp);
                 mode += 1;
                 break;
             case 2:
@@ -355,6 +373,8 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onDestroy() {
         unregisterReceiver(progressReceiver);
+        unregisterReceiver(nextReceiver);
+        unbindService(con);
         super.onDestroy();
     }
 
@@ -362,16 +382,16 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
     //////////////////////////////////////////////////////////
     @Override
     public void onProgressChanged(CircularSeekBar circularSeekBar, int progress, boolean fromUser) {
-        //发送广播通知改变进度
-        Intent intent = new Intent();
-        intent.setAction(constant.FILTER + ".progress.activity");
-        intent.putExtra("progress", progress);
-        sendBroadcast(intent);
+
     }
 
     @Override
     public void onStopTrackingTouch(CircularSeekBar seekBar) {
-
+        //发送广播通知改变进度
+        Intent intent = new Intent();
+        intent.setAction(constant.FILTER + ".progress.activity");
+        intent.putExtra("progress", seekBar.getProgress());
+        sendBroadcast(intent);
     }
 
     @Override
@@ -385,6 +405,19 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         public void onReceive(Context context, Intent intent) {
             int progress = intent.getIntExtra("progress", 0);
             seekBar.setProgress(progress);
+
+        }
+
+    }
+
+
+    /////////////////////////////////////////////////////
+
+    public class NextReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            PlayActivity.this.nextUI();
         }
     }
 }
