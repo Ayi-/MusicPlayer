@@ -7,9 +7,11 @@ import android.os.Binder;
  */
 public abstract class MyBindler extends Binder {
 
-    public abstract void startPlay();
 
     public abstract void next();
     public abstract void previous();
 
+    public abstract void pause();
+
+    public abstract void contiune();
 }

@@ -22,6 +22,15 @@ public class SongInfo extends DataSupport {
 
     String pinyin;
 
+    int duration;
+
+    public int getDuration() {
+        return duration;
+    }
+
+    public void setDuration(int duration) {
+        this.duration = duration;
+    }
 
     public int getSongId() {
         return songId;

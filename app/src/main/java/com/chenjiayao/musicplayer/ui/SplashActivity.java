@@ -109,6 +109,7 @@ public class SplashActivity extends AppCompatActivity {
                         info.setArtistName(artist);
                         info.setPinyin(HanZi2PinYinUtils.HanZi2PinYin(songName));
                         info.setSongId(id);
+                        info.setDuration(duration);
                         info.save();
 
                         List<AlbumInfo> albumInfos = DataSupport.where("albumid = ?", String.valueOf(albumId)).find(AlbumInfo.class);

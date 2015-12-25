@@ -30,7 +30,6 @@ import com.chenjiayao.musicplayer.R;
 import com.chenjiayao.musicplayer.constant;
 import com.chenjiayao.musicplayer.model.PlayList;
 import com.chenjiayao.musicplayer.model.SongInfo;
-import com.chenjiayao.musicplayer.receiver.ProgressReceiver;
 import com.chenjiayao.musicplayer.serivce.MusicPlayer;
 import com.chenjiayao.musicplayer.serivce.MyBindler;
 import com.chenjiayao.musicplayer.utils.SharePreferenceUtils;
@@ -100,18 +99,18 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         PlayList list = PlayList.getInstance(PlayActivity.this);
         setImage(list.getCurrentSong());
 
-
         bindService();
-//        binder.startPlay();
     }
 
     private void bindService() {
-        int flag = Context.BIND_AUTO_CREATE;
-        if (isWorkd(MusicPlayer.class.getName())) {
-            flag = 0;
+
+        //服务如果不存在就开启,不然就直接绑定
+        if (!isWorked(MusicPlayer.class.getName())) {
+            startService();
         }
+
         Intent bindIntent = new Intent(this, MusicPlayer.class);
-        bindService(bindIntent, con, flag);
+        bindService(bindIntent, con, 0);
     }
 
     private void startService() {
@@ -119,7 +118,7 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         startService(startIntent);
     }
 
-    boolean isWorkd(String className) {
+    boolean isWorked(String className) {
         Log.i("TAG", className);
         ActivityManager manager = (ActivityManager) getApplicationContext()
                 .getSystemService(Context.ACTIVITY_SERVICE);
@@ -175,8 +174,10 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.fab:    //暂停或者播放
+                control();
                 break;
             case R.id.next:   //下一首
+                nextUI();
                 break;
             case R.id.lyric_layout:   //从歌词界面切换到文艺界面
                 lyricLayout.setVisibility(View.INVISIBLE);
@@ -195,6 +196,24 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
                 artistConver.setVisibility(View.INVISIBLE);
                 break;
         }
+    }
+
+
+    private void control() {
+        if (list.isPlaying()) {
+            binder.pause();
+            fab.setImageResource(R.mipmap.ic_play_arrow_white_36dp);
+        } else {
+            fab.setImageResource(R.mipmap.ic_pause_white_36dp);
+            binder.contiune();
+        }
+    }
+
+    private void nextUI() {
+        binder.next();
+        SongInfo info = list.getCurrentSong();
+        setImage(info);
+        seekBar.setMax(0);
     }
 
 
@@ -344,10 +363,10 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onProgressChanged(CircularSeekBar circularSeekBar, int progress, boolean fromUser) {
         //发送广播通知改变进度
-//        Intent intent = new Intent();
-//        intent.setAction(constant.FILTER + ".progress.activity");
-//        intent.putExtra("progress", progress);
-//        sendBroadcast(intent);
+        Intent intent = new Intent();
+        intent.setAction(constant.FILTER + ".progress.activity");
+        intent.putExtra("progress", progress);
+        sendBroadcast(intent);
     }
 
     @Override
@@ -357,7 +376,6 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onStartTrackingTouch(CircularSeekBar seekBar) {
-
     }
 
     ///////////////////////////////////////////////////////

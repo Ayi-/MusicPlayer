@@ -20,10 +20,10 @@ public class PlayList {
     int current;
     Context context;
     public static PlayList lists;
-
     SharePreferenceUtils utils;
-
     boolean isPlaying;
+    int currentPos;
+
 
     public PlayList(Context context) {
         this.context = context;
@@ -41,6 +41,15 @@ public class PlayList {
         return lists;
     }
 
+
+    public int getCurrentPos() {
+        return currentPos;
+    }
+
+    public void setCurrentPos(int currentPos) {
+        Log.i("TAG", "pos : " + currentPos);
+        this.currentPos = currentPos;
+    }
 
     public void addToList(List<SongInfo> infos, int pos) {
         clearList();
@@ -110,4 +119,6 @@ public class PlayList {
     public void setIsPlaying(boolean isPlaying) {
         this.isPlaying = isPlaying;
     }
+
+
 }
