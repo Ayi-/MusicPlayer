@@ -11,6 +11,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.chenjiayao.musicplayer.constant;
 import com.chenjiayao.musicplayer.model.PlayList;
@@ -28,6 +29,7 @@ public class MusicPlayer extends Service implements MediaPlayer.OnCompletionList
     private ProgressReceiver progressReceiver;
     private PlayList list;
     private SongInfo currentInfo;
+    private KillReceiver killReceiver;
 
 
     @Nullable
@@ -72,12 +74,12 @@ public class MusicPlayer extends Service implements MediaPlayer.OnCompletionList
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-
     }
+
 
     @Override
     public void onCreate() {
+        Log.i("TAG", "------");
         handler = new Handler();
         player = new MediaPlayer();
         binder = new PlayBinder();
@@ -90,12 +92,25 @@ public class MusicPlayer extends Service implements MediaPlayer.OnCompletionList
         IntentFilter filter = new IntentFilter(constant.FILTER + ".progress.activity");
         registerReceiver(progressReceiver, filter);
 
+        killReceiver = new KillReceiver();
+        IntentFilter killFilter = new IntentFilter("com.chenjiayao.musicplayer.kill");
+        registerReceiver(killReceiver, killFilter);
+
     }
 
 
     @Override
     public void onDestroy() {
-        unregisterReceiver(progressReceiver);
+        Log.i("TAG", "onDestroy");
+        if (player != null) {
+            player.release();
+            player = null;
+            handler.removeCallbacks(runnable);
+            unregisterReceiver(progressReceiver);
+            unregisterReceiver(killReceiver);
+        }
+        stopSelf();
+        super.onDestroy();
     }
 
 
@@ -154,6 +169,13 @@ public class MusicPlayer extends Service implements MediaPlayer.OnCompletionList
 
             int progress = intent.getIntExtra("progress", 0);
             player.seekTo(progress);
+        }
+    }
+
+    class KillReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            MusicPlayer.this.onDestroy();
         }
     }
 

@@ -1,6 +1,7 @@
 package com.chenjiayao.musicplayer.ui;
 
 import android.app.ActivityManager;
+import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentUris;
@@ -116,7 +117,9 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         //服务如果不存在就开启,不然就直接绑定
         if (!isWorked(MusicPlayer.class.getName())) {
             Intent startIntent = new Intent(this, MusicPlayer.class);
+            startIntent.setFlags(Service.START_NOT_STICKY);
             startService(startIntent);
+            Log.i("TAG", "start..............");
         }
 
         Intent bindIntent = new Intent(this, MusicPlayer.class);

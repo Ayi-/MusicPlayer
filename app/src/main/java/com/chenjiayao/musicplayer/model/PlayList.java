@@ -120,5 +120,4 @@ public class PlayList {
         this.isPlaying = isPlaying;
     }
 
-
 }
