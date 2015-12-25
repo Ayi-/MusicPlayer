@@ -34,8 +34,5 @@ dependencies {
     compile 'com.google.code.gson:gson:2.2.4'
     compile 'com.loopj.android:android-async-http:1.4.9'
     compile files('libs/pinyin4j-2.5.0.jar')
-    compile 'com.github.iammert:MaskProgressView:1.0'
     compile 'com.nostra13.universalimageloader:universal-image-loader:1.9.5'
-    compile 'com.github.recruit-lifestyle:PlayPauseButton:1.0'
-    compile 'net.steamcrafted:materialiconlib:1.0.7'
 }

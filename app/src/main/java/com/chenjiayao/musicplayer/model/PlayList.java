@@ -3,10 +3,10 @@ package com.chenjiayao.musicplayer.model;
 
 import android.content.Context;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.chenjiayao.musicplayer.utils.SharePreferenceUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -15,7 +15,7 @@ import java.util.Random;
  */
 public class PlayList {
 
-    public List<SongInfo> playLists;
+    public List<SongInfo> songInfos;
     int total;
     int current;
     Context context;
@@ -28,6 +28,7 @@ public class PlayList {
     public PlayList(Context context) {
         this.context = context;
         utils = SharePreferenceUtils.getInstance(context);
+        songInfos = new ArrayList<>();
     }
 
 
@@ -43,17 +44,13 @@ public class PlayList {
 
     public void addToList(List<SongInfo> infos, int pos) {
         clearList();
-        playLists = infos;
+        songInfos.addAll(infos);
         total = infos.size();
         current = pos;
-
-        for (SongInfo info :
-                infos) {
-            Log.i("TAG", info.getSongName());
-        }
     }
 
     private void clearList() {
+        songInfos.clear();
         total = 0;
         current = -1;
     }
@@ -73,14 +70,11 @@ public class PlayList {
                 Random random = new Random(System.currentTimeMillis());
                 current = random.nextInt(total);
                 break;
-
             case 2:
                 //重新播放
                 break;
-
         }
-        Log.i("TAG", "" + current);
-        return playLists.get(current);
+        return songInfos.get(current);
     }
 
     public SongInfo getPrevious() {
@@ -97,17 +91,23 @@ public class PlayList {
                 Random random = new Random(System.currentTimeMillis());
                 current = random.nextInt(total);
                 break;
-
             case 2:
                 //重新播放
                 break;
         }
-        return playLists.get(current);
+        return songInfos.get(current);
     }
 
-    public SongInfo getcurrentSong() {
-        return playLists.get(current);
+    public SongInfo getCurrentSong() {
+        return songInfos.get(current);
     }
 
 
+    public boolean isPlaying() {
+        return isPlaying;
+    }
+
+    public void setIsPlaying(boolean isPlaying) {
+        this.isPlaying = isPlaying;
+    }
 }

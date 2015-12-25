@@ -108,8 +108,8 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
 
     @Override
     public void onClick(View v) {
-        Intent intent = new Intent(DetailActivity.this, PlayActivity.class);
-        startActivity(intent);
+//        Intent intent = new Intent(DetailActivity.this, PlayActivity.class);
+//        startActivity(intent);
 
         PlayList list = PlayList.getInstance(DetailActivity.this);
         list.addToList(songInfos, 0);

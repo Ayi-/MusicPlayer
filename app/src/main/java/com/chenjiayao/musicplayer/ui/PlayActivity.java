@@ -1,11 +1,19 @@
 package com.chenjiayao.musicplayer.ui;
 
+import android.app.ActivityManager;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.ContentUris;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -19,26 +27,26 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.chenjiayao.musicplayer.R;
+import com.chenjiayao.musicplayer.constant;
 import com.chenjiayao.musicplayer.model.PlayList;
 import com.chenjiayao.musicplayer.model.SongInfo;
-import com.chenjiayao.musicplayer.model.gecimi.GeCiMiLyric;
-import com.chenjiayao.musicplayer.utils.HttpUtils;
+import com.chenjiayao.musicplayer.receiver.ProgressReceiver;
+import com.chenjiayao.musicplayer.serivce.MusicPlayer;
+import com.chenjiayao.musicplayer.serivce.MyBindler;
 import com.chenjiayao.musicplayer.utils.SharePreferenceUtils;
 import com.chenjiayao.musicplayer.widgets.CircleImageView;
 import com.chenjiayao.musicplayer.widgets.CircularSeekBar;
-import com.google.gson.Gson;
-import com.loopj.android.http.TextHttpResponseHandler;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 
-import cz.msebera.android.httpclient.Header;
+import java.util.List;
 
 
 /**
  * Created by chen on 2015/12/19.
  */
-public class PlayActivity extends AppCompatActivity implements View.OnClickListener {
+public class PlayActivity extends AppCompatActivity implements View.OnClickListener, CircularSeekBar.OnCircularSeekBarChangeListener {
 
     FrameLayout lyricLayout;
     CircleImageView artistConver;
@@ -51,14 +59,20 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
     LinearLayout layout;
     Toolbar toolbar;
 
+
+    PlayList list;
     SongInfo currentSong;
 
-    boolean again = false;
+    ProgressReceiver progressReceiver;
+
 
     SharePreferenceUtils utils = SharePreferenceUtils.getInstance(PlayActivity.this);
 
     Uri artistUri = Uri.parse("content://media/external/audio/albumart");
     ImageLoader imageLoader = ImageLoader.getInstance();
+    private MyBindler binder;
+
+    private ServiceConnection con;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,89 +81,66 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
 
         init();
 
-        seekBar.setOnSeekBarChangeListener(new CircularSeekBar.OnCircularSeekBarChangeListener() {
+        con = new ServiceConnection() {
             @Override
-            public void onProgressChanged(CircularSeekBar circularSeekBar, int progress, boolean fromUser) {
-                Log.i("TAG", "" + progress);
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                binder = (MyBindler) service;
             }
 
             @Override
-            public void onStopTrackingTouch(CircularSeekBar seekBar) {
+            public void onServiceDisconnected(ComponentName name) {
 
             }
+        };
 
-            @Override
-            public void onStartTrackingTouch(CircularSeekBar seekBar) {
-
-            }
-        });
-
+        list = PlayList.getInstance(PlayActivity.this);
+        list.setIsPlaying(true);
+        fab.setImageResource(R.mipmap.ic_pause_white_36dp);
 
         PlayList list = PlayList.getInstance(PlayActivity.this);
-        setImage(list.getcurrentSong());
+        setImage(list.getCurrentSong());
 
-        loadLyric(currentSong.getSongName(), "/" + currentSong.getArtistName());
+
+        bindService();
+//        binder.startPlay();
     }
 
-    private void loadLyric(String songName, String artistName) {
-        //先在本地找,找不到再到网络下载.
-        loadFromNet(songName, artistName);
+    private void bindService() {
+        int flag = Context.BIND_AUTO_CREATE;
+        if (isWorkd(MusicPlayer.class.getName())) {
+            flag = 0;
+        }
+        Intent bindIntent = new Intent(this, MusicPlayer.class);
+        bindService(bindIntent, con, flag);
     }
 
-    //网络下载歌词
-    private void loadFromNet(final String songName, String artistName) {
-        String url = "http://geci.me/api/lyric/" + songName + artistName;
-        HttpUtils.getJson(url,
-                new TextHttpResponseHandler() {
-                    @Override
-                    public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                        loadFromNet(songName, "");
-                    }
-
-                    @Override
-                    public void onSuccess(int statusCode, Header[] headers, String responseString) {
-                        parseJson(responseString);
-                    }
-                });
+    private void startService() {
+        Intent startIntent = new Intent(this, MusicPlayer.class);
+        startService(startIntent);
     }
 
-    /**
-     * 解析json数据
-     *
-     * @param responseString
-     */
-    private void parseJson(String responseString) {
-        Gson gson = new Gson();
-        GeCiMiLyric lyric = gson.fromJson(responseString, GeCiMiLyric.class);
+    boolean isWorkd(String className) {
+        Log.i("TAG", className);
+        ActivityManager manager = (ActivityManager) getApplicationContext()
+                .getSystemService(Context.ACTIVITY_SERVICE);
 
-        //说明这样子的查询并没有获取到歌词,那么试试通过歌名再次搜索
-        if (lyric.getCount() == 0 && !again) {
-            loadFromNet(currentSong.getSongName(), "");
-            again = true;
-        } else {
-            again = false;
+        boolean res = false;
+        List<ActivityManager.RunningServiceInfo> services = manager.getRunningServices(50);
+        if (services.size() <= 0) {
+            res = false;
+        }
 
-            if (lyric.getCount() == 0) {
-                //说明并没有下载到歌词
-            } else {
-                //有歌词,下载
-                lyric = gson.fromJson(responseString, GeCiMiLyric.class);
-                String url = lyric.getResult().get(0).getLrc();
+        for (int i = 0; i < services.size(); i++) {
+            Log.i("TAG", services.get(i).service.getClassName());
+            if (services.get(i).service.getClassName().equals(className)) {
+                res = true;
 
-                downloadLyric(url);
-
+                break;
             }
         }
+        return res;
     }
 
-    /**
-     * 根据url下载文件
-     *
-     * @param url
-     */
-    private void downloadLyric(String url) {
-
-    }
 
     private void init() {
         layout = (LinearLayout) findViewById(R.id.layout);
@@ -171,23 +162,27 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         lyricLayout.setOnClickListener(this);
         artistConver.setOnClickListener(this);
         seekBar = (CircularSeekBar) findViewById(R.id.song_progress_circular);
+        seekBar.setOnSeekBarChangeListener(this);
+
+        progressReceiver = new ProgressReceiver();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(constant.FILTER + ".service.progress");
+        registerReceiver(progressReceiver, filter);
+
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.fab:    //暂停或者播放
-
                 break;
             case R.id.next:   //下一首
-                playNext();
                 break;
             case R.id.lyric_layout:   //从歌词界面切换到文艺界面
                 lyricLayout.setVisibility(View.INVISIBLE);
                 artistConver.setVisibility(View.VISIBLE);
                 break;
             case R.id.previous:     //上一首
-                playPrevious();
                 break;
             case R.id.timer:      //定时退出
                 showDialog();
@@ -202,21 +197,6 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    /**
-     * 发送广播播放下一首,同时更新界面
-     */
-    private void playNext() {
-        PlayList list = PlayList.getInstance(PlayActivity.this);
-        SongInfo info = list.getNext();
-        setImage(info);
-
-    }
-
-    private void playPrevious() {
-        PlayList list = PlayList.getInstance(PlayActivity.this);
-        SongInfo info = list.getPrevious();
-        setImage(info);
-    }
 
     private void setImage(SongInfo song) {
 
@@ -351,6 +331,43 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
                 break;
         }
         return true;
+    }
+
+    @Override
+    protected void onDestroy() {
+        unregisterReceiver(progressReceiver);
+        super.onDestroy();
+    }
+
+
+    //////////////////////////////////////////////////////////
+    @Override
+    public void onProgressChanged(CircularSeekBar circularSeekBar, int progress, boolean fromUser) {
+        //发送广播通知改变进度
+//        Intent intent = new Intent();
+//        intent.setAction(constant.FILTER + ".progress.activity");
+//        intent.putExtra("progress", progress);
+//        sendBroadcast(intent);
+    }
+
+    @Override
+    public void onStopTrackingTouch(CircularSeekBar seekBar) {
+
+    }
+
+    @Override
+    public void onStartTrackingTouch(CircularSeekBar seekBar) {
+
+    }
+
+    ///////////////////////////////////////////////////////
+    public class ProgressReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            int progress = intent.getIntExtra("progress", 0);
+            seekBar.setProgress(progress);
+        }
     }
 }
 
