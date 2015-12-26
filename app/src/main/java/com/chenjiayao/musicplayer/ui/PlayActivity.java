@@ -60,23 +60,20 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
     LinearLayout layout;
     Toolbar toolbar;
 
-
     PlayList list;
     SongInfo currentSong;
-
     ProgressReceiver progressReceiver;
-
-
-    SharePreferenceUtils utils = SharePreferenceUtils.getInstance(PlayActivity.this);
-
-    Uri artistUri = Uri.parse("content://media/external/audio/albumart");
-    ImageLoader imageLoader = ImageLoader.getInstance();
     private MyBindler binder;
+    private NextReceiver nextReceiver;
+    private Uri artistUri;
+    private ImageLoader imageLoader;
+
 
     private ServiceConnection con = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             binder = (MyBindler) service;
+            binder.startPlay();
         }
 
         @Override
@@ -84,7 +81,8 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
 
         }
     };
-    private NextReceiver nextReceiver;
+    private SharePreferenceUtils utils;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,18 +91,19 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
 
         init();
 
-
+        artistUri = Uri.parse("content://media/external/audio/albumart");
+        imageLoader = ImageLoader.getInstance();
         list = PlayList.getInstance(PlayActivity.this);
         list.setIsPlaying(true);
         fab.setImageResource(R.mipmap.ic_pause_white_36dp);
+        utils = SharePreferenceUtils.getInstance(PlayActivity.this);
 
         PlayList list = PlayList.getInstance(PlayActivity.this);
         setImage(list.getCurrentSong());
 
         bindService();
+
         loadLyric();
-
-
     }
 
     //加载歌词
@@ -119,7 +118,6 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
             Intent startIntent = new Intent(this, MusicPlayer.class);
             startIntent.setFlags(Service.START_NOT_STICKY);
             startService(startIntent);
-            Log.i("TAG", "start..............");
         }
 
         Intent bindIntent = new Intent(this, MusicPlayer.class);
@@ -213,6 +211,8 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         binder.previous();
         SongInfo info = list.getCurrentSong();
         setImage(info);
+        fab.setImageResource(R.mipmap.ic_pause_white_36dp);
+        list.setIsPlaying(true);
         seekBar.setMax(currentSong.getDuration());
     }
 
@@ -229,9 +229,12 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
 
 
     private void nextUI() {
+        Log.i("TAG", "next");
         binder.next();
         SongInfo info = list.getCurrentSong();
         setImage(info);
+        fab.setImageResource(R.mipmap.ic_pause_white_36dp);
+        list.setIsPlaying(true);
         seekBar.setMax(currentSong.getDuration());
     }
 
@@ -277,6 +280,10 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
 
             }
         });
+
+        Intent intent = new Intent();
+        intent.setAction("com.chenjiayao.musicplayer.ui");
+        sendBroadcast(intent);
     }
 
 

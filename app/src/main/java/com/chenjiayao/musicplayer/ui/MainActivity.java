@@ -1,9 +1,15 @@
 package com.chenjiayao.musicplayer.ui;
 
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
+import android.content.ContentUris;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -18,11 +24,18 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.chenjiayao.musicplayer.R;
 import com.chenjiayao.musicplayer.adapter.ViewPagerAdapter;
+import com.chenjiayao.musicplayer.model.PlayList;
+import com.chenjiayao.musicplayer.model.SongInfo;
 import com.chenjiayao.musicplayer.utils.SharePreferenceUtils;
+import com.nostra13.universalimageloader.core.ImageLoader;
 
 
 public class MainActivity extends AppCompatActivity
@@ -33,6 +46,11 @@ public class MainActivity extends AppCompatActivity
     private Toolbar toolbar;
     private ViewPager viewPager;
     private TabLayout tabLayout;
+    private UIReceiver uiReceiver;
+
+    private ImageView conver;
+    private TextView songName;
+    TextView artist;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,11 +61,20 @@ public class MainActivity extends AppCompatActivity
         setViewPager();
         setDrawLayout();
 
+        View headerView = navigationView.inflateHeaderView(R.layout.nav_header_main);
+        songName = (TextView) headerView.findViewById(R.id.song);
+        artist = (TextView) headerView.findViewById(R.id.artist);
+        conver = (ImageView) headerView.findViewById(R.id.conver);
+
         SharePreferenceUtils utils = SharePreferenceUtils.getInstance(MainActivity.this);
 
         if (utils.isFirstTimeUse()) {
             utils.setNotFirst();
         }
+
+        uiReceiver = new UIReceiver();
+        IntentFilter filter = new IntentFilter("com.chenjiayao.musicplayer.ui");
+        registerReceiver(uiReceiver, filter);
     }
 
 
@@ -122,15 +149,49 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+    long[] mHits = new long[2];
+
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
+
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            Intent intent = new Intent();
-            intent.setAction("com.chenjiayao.musicplayer.kill");
-            sendBroadcast(intent);
-            finish();
-//            android.os.Process.killProcess(android.os.Process.myPid());
+            System.arraycopy(mHits, 1, mHits, 0, mHits.length - 1);
+            mHits[mHits.length - 1] = SystemClock.uptimeMillis();
+
+            if (mHits[0] >= (SystemClock.uptimeMillis() - 1000)) {
+                Intent intent = new Intent();
+                intent.setAction("com.chenjiayao.musicplayer.kill");
+                sendBroadcast(intent);
+                finish();
+            } else {
+
+                Snackbar.make(viewPager, "再次点击关闭音乐退出", Snackbar.LENGTH_SHORT)
+                        .setDuration(1000).show();
+            }
         }
-        return super.onKeyDown(keyCode, event);
+        return true;
+    }
+
+
+    class UIReceiver extends BroadcastReceiver {
+
+        ImageLoader imageLoader = ImageLoader.getInstance();
+        Uri artistUri = Uri.parse("content://media/external/audio/albumart");
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            PlayList list = PlayList.getInstance(MainActivity.this);
+            SongInfo songInfo = list.getCurrentSong();
+            artist.setText(songInfo.getArtistName());
+            songName.setText(songInfo.getSongName());
+            Uri uri = ContentUris.withAppendedId(artistUri, songInfo.getAlbumId());
+            imageLoader.displayImage(String.valueOf(uri), conver);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(uiReceiver);
     }
 }

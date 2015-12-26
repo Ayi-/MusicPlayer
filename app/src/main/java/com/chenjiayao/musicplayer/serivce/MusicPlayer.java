@@ -35,12 +35,12 @@ public class MusicPlayer extends Service implements MediaPlayer.OnCompletionList
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
+        startPlayService(list.getCurrentSong());
         return binder;
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        startPlayService(list.getCurrentSong());
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -59,6 +59,7 @@ public class MusicPlayer extends Service implements MediaPlayer.OnCompletionList
 
     void startPlayService(SongInfo info) {
 
+        Log.i("TAG", "startPlayService");
         if (currentInfo != null) {
             if (list.isPlaying() && !currentInfo.getSongName().equals(info.getSongName())) {
                 player.reset();
@@ -79,7 +80,7 @@ public class MusicPlayer extends Service implements MediaPlayer.OnCompletionList
 
     @Override
     public void onCreate() {
-        Log.i("TAG", "------");
+        Log.i("TAG", "oncreate");
         handler = new Handler();
         player = new MediaPlayer();
         binder = new PlayBinder();
@@ -101,7 +102,6 @@ public class MusicPlayer extends Service implements MediaPlayer.OnCompletionList
 
     @Override
     public void onDestroy() {
-        Log.i("TAG", "onDestroy");
         if (player != null) {
             player.release();
             player = null;
@@ -158,6 +158,11 @@ public class MusicPlayer extends Service implements MediaPlayer.OnCompletionList
 
             handler.postDelayed(runnable, 0);
         }
+
+        @Override
+        public void startPlay() {
+            startPlayService(list.getCurrentSong());
+        }
     }
 
 
@@ -169,6 +174,7 @@ public class MusicPlayer extends Service implements MediaPlayer.OnCompletionList
 
             int progress = intent.getIntExtra("progress", 0);
             player.seekTo(progress);
+            list.setCurrentPos(progress);
         }
     }
 

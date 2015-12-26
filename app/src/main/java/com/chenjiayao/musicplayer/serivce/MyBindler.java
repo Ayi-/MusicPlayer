@@ -14,4 +14,6 @@ public abstract class MyBindler extends Binder {
     public abstract void pause();
 
     public abstract void contiune();
+
+    public abstract void startPlay();
 }
