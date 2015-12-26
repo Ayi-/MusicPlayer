@@ -1,9 +1,11 @@
 package com.chenjiayao.musicplayer.model;
 
+import java.util.Comparator;
+
 /**
  * Created by chen on 2015/12/26.
  */
-public class LrcContent {
+public class LrcContent implements Comparable<LrcContent> {
 
     /**
      * 一行歌词
@@ -29,5 +31,10 @@ public class LrcContent {
 
     public void setLrcTime(int lrcTime) {
         this.lrcTime = lrcTime;
+    }
+
+    @Override
+    public int compareTo(LrcContent another) {
+        return this.lrcTime - another.lrcTime;
     }
 }

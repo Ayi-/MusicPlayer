@@ -47,7 +47,6 @@ public class PlayList {
     }
 
     public void setCurrentPos(int currentPos) {
-        Log.i("TAG", "pos : " + currentPos);
         this.currentPos = currentPos;
     }
 

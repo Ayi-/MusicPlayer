@@ -62,15 +62,17 @@
             android:visibility="invisible">
 
             <com.chenjiayao.musicplayer.widgets.LrcView
+                android:id="@+id/lrc_view"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent"
+                android:text="FASDFASFDSAFSDAFGFFFFFFFFFFFFFFFFFFFF" />
         </FrameLayout>
     </RelativeLayout>
 
     <RelativeLayout
-        android:layout_marginTop="10dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp">
 
         <ImageView
             android:id="@+id/timer"

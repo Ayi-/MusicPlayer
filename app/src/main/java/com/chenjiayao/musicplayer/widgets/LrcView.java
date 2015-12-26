@@ -4,8 +4,10 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.widget.TextView;
 
 import com.chenjiayao.musicplayer.model.LrcContent;
@@ -25,11 +27,13 @@ public class LrcView extends TextView {
     float textHeight;
     float textSize;
     int index = 0;
+
     List<LrcContent> list = new ArrayList<>();
 
 
     public void setList(List<LrcContent> list) {
         this.list = list;
+
     }
 
     public LrcView(Context context) {
@@ -51,7 +55,7 @@ public class LrcView extends TextView {
 
         noCurrentPaint = new Paint();
         noCurrentPaint.setAntiAlias(true);
-        currentPaint.setTextAlign(Paint.Align.CENTER);
+        noCurrentPaint.setTextAlign(Paint.Align.CENTER);
     }
 
     @Override
@@ -64,23 +68,33 @@ public class LrcView extends TextView {
         currentPaint.setTextSize(24);
         currentPaint.setTypeface(Typeface.SERIF);
 
-        noCurrentPaint.setTextSize(textSize);
+        noCurrentPaint.setTextSize(20);
         noCurrentPaint.setTypeface(Typeface.DEFAULT);
 
         setText("");
+        if (list.size() == 0) {
+            canvas.drawText("正在加载歌词....", width / 2, height / 2, currentPaint);
+        } else {
 
-        canvas.drawText(list.get(index).getLrcStr(), width / 2, height / 2, currentPaint);
+            Rect bounds = new Rect();
+            currentPaint.getTextBounds(list.get(0).getLrcStr(), 0, 1, bounds);
+            textHeight = bounds.height();
 
-        float tempY = height / 2;
-        for (int i = index - 1; i >= 0; i++) {
-            tempY = tempY - textHeight;
-            canvas.drawText(list.get(i).getLrcStr(), width / 2, tempY, noCurrentPaint);
-        }
+            canvas.drawText(list.get(index).getLrcStr(), width / 2, height / 2, currentPaint);
 
-        tempY = height / 2;
-        for (int i = index + 1; i < list.size(); i++) {
-            tempY = tempY + textHeight;
-            canvas.drawText(list.get(i).getLrcStr(), width / 2, tempY, noCurrentPaint);
+            float tempY = height / 2;
+
+            for (int i = index - 1; i >= 0; i--) {
+                tempY = tempY - textHeight - 50;
+                canvas.drawText(list.get(i).getLrcStr(), width / 2, tempY, noCurrentPaint);
+            }
+
+            tempY = height / 2;
+            for (int i = index + 1; i < list.size(); i++) {
+
+                tempY = tempY + textHeight + 50;
+                canvas.drawText(list.get(i).getLrcStr(), width / 2, tempY, noCurrentPaint);
+            }
         }
     }
 

@@ -30,6 +30,7 @@ public class MusicPlayer extends Service implements MediaPlayer.OnCompletionList
     private PlayList list;
     private SongInfo currentInfo;
     private KillReceiver killReceiver;
+    private MusicPlayer.phoneReceiver phoneReceiver;
 
 
     @Nullable
@@ -52,6 +53,7 @@ public class MusicPlayer extends Service implements MediaPlayer.OnCompletionList
             Intent intent = new Intent();
             intent.setAction(constant.FILTER + ".service.progress");
             intent.putExtra("progress", player.getCurrentPosition());
+            list.setCurrentPos(player.getCurrentPosition());
             sendBroadcast(intent);
             handler.postDelayed(this, 1000);
         }
@@ -59,17 +61,16 @@ public class MusicPlayer extends Service implements MediaPlayer.OnCompletionList
 
     void startPlayService(SongInfo info) {
 
-        Log.i("TAG", "startPlayService");
         if (currentInfo != null) {
             if (list.isPlaying() && !currentInfo.getSongName().equals(info.getSongName())) {
                 player.reset();
             }
         }
-        handler.postDelayed(runnable, 1000);
-        player.setAudioStreamType(AudioManager.STREAM_MUSIC);
         try {
+            handler.postDelayed(runnable, 1000);
             currentInfo = info;
             player.setDataSource(info.getPath());
+            player.setAudioStreamType(AudioManager.STREAM_MUSIC);
             player.prepare();
             player.start();
         } catch (Exception e) {
@@ -80,9 +81,9 @@ public class MusicPlayer extends Service implements MediaPlayer.OnCompletionList
 
     @Override
     public void onCreate() {
-        Log.i("TAG", "oncreate");
         handler = new Handler();
         player = new MediaPlayer();
+        player.reset();
         binder = new PlayBinder();
         list = PlayList.getInstance(getApplicationContext());
 
@@ -97,6 +98,12 @@ public class MusicPlayer extends Service implements MediaPlayer.OnCompletionList
         IntentFilter killFilter = new IntentFilter("com.chenjiayao.musicplayer.kill");
         registerReceiver(killReceiver, killFilter);
 
+        phoneReceiver = new phoneReceiver();
+        IntentFilter phoneFilter = new IntentFilter();
+        phoneFilter.addAction("android.intent.action.PHONE_STATE");
+        phoneFilter.addAction("android.intent.action.NEW_OUTGOING_CALL");
+        registerReceiver(phoneReceiver, phoneFilter);
+
     }
 
 
@@ -108,6 +115,7 @@ public class MusicPlayer extends Service implements MediaPlayer.OnCompletionList
             handler.removeCallbacks(runnable);
             unregisterReceiver(progressReceiver);
             unregisterReceiver(killReceiver);
+            unregisterReceiver(phoneReceiver);
         }
         stopSelf();
         super.onDestroy();
@@ -182,6 +190,14 @@ public class MusicPlayer extends Service implements MediaPlayer.OnCompletionList
         @Override
         public void onReceive(Context context, Intent intent) {
             MusicPlayer.this.onDestroy();
+        }
+    }
+
+    class phoneReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
         }
     }
 

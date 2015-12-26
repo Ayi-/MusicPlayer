@@ -22,6 +22,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.Toolbar;
 import android.telephony.SmsManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -31,18 +32,24 @@ import android.widget.LinearLayout;
 
 import com.chenjiayao.musicplayer.R;
 import com.chenjiayao.musicplayer.constant;
+import com.chenjiayao.musicplayer.model.LrcContent;
 import com.chenjiayao.musicplayer.model.PlayList;
 import com.chenjiayao.musicplayer.model.SongInfo;
 import com.chenjiayao.musicplayer.serivce.MusicPlayer;
 import com.chenjiayao.musicplayer.serivce.MyBindler;
+import com.chenjiayao.musicplayer.utils.LrcProcess;
 import com.chenjiayao.musicplayer.utils.LyricUtils;
 import com.chenjiayao.musicplayer.utils.SharePreferenceUtils;
 import com.chenjiayao.musicplayer.widgets.CircleImageView;
 import com.chenjiayao.musicplayer.widgets.CircularSeekBar;
+import com.chenjiayao.musicplayer.widgets.LrcView;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 
+import java.security.AlgorithmParameterGenerator;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -51,6 +58,7 @@ import java.util.List;
  */
 public class PlayActivity extends AppCompatActivity implements View.OnClickListener, CircularSeekBar.OnCircularSeekBarChangeListener {
 
+    private static final String TAG = "PlayActivity";
     FrameLayout lyricLayout;
     CircleImageView artistConver;
     CircularSeekBar seekBar;
@@ -70,6 +78,9 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
     private Uri artistUri;
     private ImageLoader imageLoader;
 
+    LrcView lrcView;
+
+    LrcProcess process;
 
     private ServiceConnection con = new ServiceConnection() {
         @Override
@@ -84,6 +95,7 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         }
     };
     private SharePreferenceUtils utils;
+    private List<LrcContent> lrcList;
 
 
     @Override
@@ -103,12 +115,14 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         PlayList list = PlayList.getInstance(PlayActivity.this);
         setImage(list.getCurrentSong());
         bindService();
-        loadLyric();
+
+        loadLyric(currentSong);
     }
 
-    //加载歌词
-    private void loadLyric() {
 
+    private void loadLyric(SongInfo info) {
+        Log.i("TAG", "loadLyric");
+        new LoadLrc().execute(info);
     }
 
     private void bindService() {
@@ -154,6 +168,10 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         timer = (ImageView) findViewById(R.id.timer);
         lyricLayout = (FrameLayout) findViewById(R.id.lyric_layout);
         artistConver = (CircleImageView) findViewById(R.id.album_art);
+        lrcView = (LrcView) findViewById(R.id.lrc_view);
+
+
+        process = new LrcProcess();
 
         layout.setOnClickListener(this);
         fab.setOnClickListener(this);
@@ -175,7 +193,45 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction("com.chenjiayao.musicplayer.next");
         registerReceiver(nextReceiver, intentFilter);
+
+
     }
+
+    class LoadLrc extends AsyncTask<SongInfo, Void, List<LrcContent>> {
+
+        @Override
+        protected List<LrcContent> doInBackground(SongInfo... params) {
+            String path = LyricUtils.getLrcPath(params[0], PlayActivity.this);
+
+            if (TextUtils.isEmpty(path)) {
+                return null;
+            }
+
+            process.readLrc(path);  //传入歌词文件
+
+            lrcList = process.getContents();
+
+            return lrcList;
+        }
+
+        @Override
+        protected void onPreExecute() {
+
+        }
+
+        @Override
+        protected void onPostExecute(List<LrcContent> lrcContents) {
+
+            lrcList = lrcContents;
+            Collections.sort(lrcList);
+
+
+            lrcView.setList(lrcList);
+            lrcView.setIndex(2);
+            lrcView.invalidate();
+        }
+    }
+
 
     @Override
     public void onClick(View v) {
@@ -213,6 +269,8 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         fab.setImageResource(R.mipmap.ic_pause_white_36dp);
         list.setIsPlaying(true);
         seekBar.setMax(currentSong.getDuration());
+        loadLyric(info);
+        lrcView.setIndex(1);
     }
 
 
@@ -228,13 +286,15 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
 
 
     private void nextUI() {
-        Log.i("TAG", "next");
         binder.next();
         SongInfo info = list.getCurrentSong();
         setImage(info);
         fab.setImageResource(R.mipmap.ic_pause_white_36dp);
         list.setIsPlaying(true);
         seekBar.setMax(currentSong.getDuration());
+
+        loadLyric(info);
+        lrcView.setIndex(1);
     }
 
 
@@ -283,6 +343,7 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         Intent intent = new Intent();
         intent.setAction("com.chenjiayao.musicplayer.ui");
         sendBroadcast(intent);
+
     }
 
 
@@ -410,15 +471,43 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
     ///////////////////////////////////////////////////////
     public class ProgressReceiver extends BroadcastReceiver {
 
+
         @Override
         public void onReceive(Context context, Intent intent) {
             int progress = intent.getIntExtra("progress", 0);
             seekBar.setProgress(progress);
 
+            //应该在这里更新歌词
+            if (lyricLayout.getVisibility() == View.VISIBLE && !lrcList.isEmpty()) {
+                PlayActivity.this.lrcView.setIndex(getIndex());
+                PlayActivity.this.lrcView.invalidate();
+
+            }
         }
 
     }
 
+    private int getIndex() {
+
+
+        int currentTime = seekBar.getProgress();
+        int newIndex = 1;
+        for (int i = 0; i < lrcList.size(); i++) {
+
+            int temp = lrcList.get(i).getLrcTime() - currentTime;
+            if (temp > 0) {
+
+                if (i - 1 > lrcView.getIndex()) {
+                    newIndex = i - 1;
+                } else {
+                    newIndex = lrcView.getIndex();
+                }
+                break;
+            }
+        }
+        Log.i("TAG", "" + newIndex);
+        return newIndex;
+    }
 
     /////////////////////////////////////////////////////
 

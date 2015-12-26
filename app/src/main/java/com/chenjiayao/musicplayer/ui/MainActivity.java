@@ -19,6 +19,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.graphics.Palette;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -39,7 +40,7 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
 
     private DrawerLayout drawer;
     private NavigationView navigationView;
@@ -65,6 +66,8 @@ public class MainActivity extends AppCompatActivity
         songName = (TextView) headerView.findViewById(R.id.song);
         artist = (TextView) headerView.findViewById(R.id.artist);
         conver = (ImageView) headerView.findViewById(R.id.conver);
+
+        conver.setOnClickListener(this);
 
         SharePreferenceUtils utils = SharePreferenceUtils.getInstance(MainActivity.this);
 
@@ -170,6 +173,12 @@ public class MainActivity extends AppCompatActivity
             }
         }
         return true;
+    }
+
+    @Override
+    public void onClick(View v) {
+        Intent intent = new Intent(MainActivity.this, PlayActivity.class);
+        startActivity(intent);
     }
 
 

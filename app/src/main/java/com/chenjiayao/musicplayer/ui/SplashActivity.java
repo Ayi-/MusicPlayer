@@ -99,7 +99,7 @@ public class SplashActivity extends AppCompatActivity {
                     //专辑id
                     int albumId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID));
 
-                    if (duration > 120) {
+                    if (duration > 120000) {
 
                         SongInfo info = new SongInfo();
                         info.setPath(songPath);

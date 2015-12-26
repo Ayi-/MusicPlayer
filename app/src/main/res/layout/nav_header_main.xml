@@ -6,23 +6,23 @@
     android:theme="@style/ThemeOverlay.AppCompat.Dark">
 
     <ImageView
-        android:scaleType="fitCenter"
         android:id="@+id/conver"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:scaleType="centerCrop"
         android:src="@mipmap/ic_launcher" />
 
     <TextView
         android:id="@+id/song"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="40dp"
+        android:layout_marginLeft="10dp"
         android:singleLine="true"
         android:text="Android Studio"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-        android:textColor="@android:color/black"
+        android:textColor="@android:color/white"
         android:textSize="20sp" />
 
     <TextView
@@ -34,7 +34,7 @@
         android:layout_marginLeft="10dp"
         android:singleLine="true"
         android:text="android.studio@android.com"
-        android:textColor="@android:color/black"
+        android:textColor="@android:color/white"
         android:textSize="15sp" />
 
 </RelativeLayout>
