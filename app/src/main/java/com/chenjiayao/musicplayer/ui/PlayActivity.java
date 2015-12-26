@@ -13,6 +13,7 @@ import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.design.widget.FloatingActionButton;
@@ -34,6 +35,7 @@ import com.chenjiayao.musicplayer.model.PlayList;
 import com.chenjiayao.musicplayer.model.SongInfo;
 import com.chenjiayao.musicplayer.serivce.MusicPlayer;
 import com.chenjiayao.musicplayer.serivce.MyBindler;
+import com.chenjiayao.musicplayer.utils.LyricUtils;
 import com.chenjiayao.musicplayer.utils.SharePreferenceUtils;
 import com.chenjiayao.musicplayer.widgets.CircleImageView;
 import com.chenjiayao.musicplayer.widgets.CircularSeekBar;
@@ -100,9 +102,7 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
 
         PlayList list = PlayList.getInstance(PlayActivity.this);
         setImage(list.getCurrentSong());
-
         bindService();
-
         loadLyric();
     }
 
@@ -137,7 +137,6 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         for (int i = 0; i < services.size(); i++) {
             if (services.get(i).service.getClassName().equals(className)) {
                 res = true;
-
                 break;
             }
         }

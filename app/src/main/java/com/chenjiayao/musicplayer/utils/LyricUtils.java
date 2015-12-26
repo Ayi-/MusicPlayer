@@ -1,9 +1,20 @@
 package com.chenjiayao.musicplayer.utils;
 
 
+import android.os.AsyncTask;
+
+import com.chenjiayao.musicplayer.model.SongInfo;
+
+
 public class LyricUtils {
 
-    public static String getLyricFilePath(String name) {
-        return null;
+
+
+    public class loadLrc extends AsyncTask<SongInfo,Void,String>{
+
+        @Override
+        protected String doInBackground(SongInfo... params) {
+            return null;
+        }
     }
 }
