@@ -1,5 +1,8 @@
 package com.chenjiayao.musicplayer.serivce;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -11,11 +14,16 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.support.annotation.Nullable;
+import android.support.v7.app.NotificationCompat;
 import android.util.Log;
+import android.widget.RemoteViews;
 
+import com.chenjiayao.musicplayer.R;
 import com.chenjiayao.musicplayer.constant;
 import com.chenjiayao.musicplayer.model.PlayList;
 import com.chenjiayao.musicplayer.model.SongInfo;
+import com.chenjiayao.musicplayer.ui.PlayActivity;
+import com.chenjiayao.musicplayer.utils.ToastUtils;
 
 /**
  * Created by chen on 2015/12/24.
@@ -30,7 +38,7 @@ public class MusicPlayer extends Service implements MediaPlayer.OnCompletionList
     private PlayList list;
     private SongInfo currentInfo;
     private KillReceiver killReceiver;
-    private MusicPlayer.phoneReceiver phoneReceiver;
+    private NotificationManager nm;
 
 
     @Nullable
@@ -69,6 +77,8 @@ public class MusicPlayer extends Service implements MediaPlayer.OnCompletionList
         try {
             handler.postDelayed(runnable, 1000);
             currentInfo = info;
+
+
             player.setDataSource(info.getPath());
             player.setAudioStreamType(AudioManager.STREAM_MUSIC);
             player.prepare();
@@ -76,6 +86,24 @@ public class MusicPlayer extends Service implements MediaPlayer.OnCompletionList
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        RemoteViews remoteViews = new RemoteViews(this.getPackageName(), R.layout.layout_remote);
+        remoteViews.setTextViewText(R.id.song_name, info.getSongName());
+
+        Intent intent = new Intent(getApplicationContext(), PlayActivity.class);
+        PendingIntent pi = PendingIntent.getActivity(getApplicationContext(), 0, intent, 0);
+
+        Notification.Builder builder = new Notification.Builder(getApplicationContext());
+        builder.setSmallIcon(R.mipmap.ic_launcher)
+                .setPriority(Notification.PRIORITY_HIGH)
+                .setWhen(System.currentTimeMillis())
+                .setContent(remoteViews)
+                .setTicker("正在播放")
+                .setContentIntent(pi);
+
+        nm.notify(0, builder.build());
     }
 
 
@@ -83,11 +111,11 @@ public class MusicPlayer extends Service implements MediaPlayer.OnCompletionList
     public void onCreate() {
         handler = new Handler();
         player = new MediaPlayer();
-        player.reset();
         binder = new PlayBinder();
         list = PlayList.getInstance(getApplicationContext());
 
         player.setOnCompletionListener(this);
+        player.reset();
 
         //接收广播
         progressReceiver = new ProgressReceiver();
@@ -98,11 +126,6 @@ public class MusicPlayer extends Service implements MediaPlayer.OnCompletionList
         IntentFilter killFilter = new IntentFilter("com.chenjiayao.musicplayer.kill");
         registerReceiver(killReceiver, killFilter);
 
-        phoneReceiver = new phoneReceiver();
-        IntentFilter phoneFilter = new IntentFilter();
-        phoneFilter.addAction("android.intent.action.PHONE_STATE");
-        phoneFilter.addAction("android.intent.action.NEW_OUTGOING_CALL");
-        registerReceiver(phoneReceiver, phoneFilter);
 
     }
 
@@ -115,8 +138,8 @@ public class MusicPlayer extends Service implements MediaPlayer.OnCompletionList
             handler.removeCallbacks(runnable);
             unregisterReceiver(progressReceiver);
             unregisterReceiver(killReceiver);
-            unregisterReceiver(phoneReceiver);
         }
+        nm.cancel(0);
         stopSelf();
         super.onDestroy();
     }
@@ -171,6 +194,8 @@ public class MusicPlayer extends Service implements MediaPlayer.OnCompletionList
         public void startPlay() {
             startPlayService(list.getCurrentSong());
         }
+
+
     }
 
 
@@ -193,12 +218,6 @@ public class MusicPlayer extends Service implements MediaPlayer.OnCompletionList
         }
     }
 
-    class phoneReceiver extends BroadcastReceiver {
 
-        @Override
-        public void onReceive(Context context, Intent intent) {
-
-        }
-    }
 
 }

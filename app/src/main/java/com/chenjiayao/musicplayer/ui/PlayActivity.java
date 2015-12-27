@@ -1,6 +1,10 @@
 package com.chenjiayao.musicplayer.ui;
 
+import android.animation.Animator;
+import android.animation.ValueAnimator;
 import android.app.ActivityManager;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -11,17 +15,25 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.renderscript.Allocation;
+import android.renderscript.RenderScript;
+import android.renderscript.ScriptIntrinsicBlur;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.Toolbar;
-import android.telephony.SmsManager;
+import android.telephony.PhoneStateListener;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
@@ -37,18 +49,19 @@ import com.chenjiayao.musicplayer.model.PlayList;
 import com.chenjiayao.musicplayer.model.SongInfo;
 import com.chenjiayao.musicplayer.serivce.MusicPlayer;
 import com.chenjiayao.musicplayer.serivce.MyBindler;
+import com.chenjiayao.musicplayer.utils.FastBlurUtils;
 import com.chenjiayao.musicplayer.utils.LrcProcess;
 import com.chenjiayao.musicplayer.utils.LyricUtils;
 import com.chenjiayao.musicplayer.utils.SharePreferenceUtils;
+import com.chenjiayao.musicplayer.utils.ToastUtils;
 import com.chenjiayao.musicplayer.widgets.CircleImageView;
 import com.chenjiayao.musicplayer.widgets.CircularSeekBar;
 import com.chenjiayao.musicplayer.widgets.LrcView;
+import com.chenjiayao.musicplayer.widgets.MyAnimateListener;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 
-import java.security.AlgorithmParameterGenerator;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -69,6 +82,8 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
     FloatingActionButton fab;
     LinearLayout layout;
     Toolbar toolbar;
+
+    float rotate = 0.0f;
 
     PlayList list;
     SongInfo currentSong;
@@ -96,6 +111,8 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
     };
     private SharePreferenceUtils utils;
     private List<LrcContent> lrcList;
+    private PhoneReceiver phoneReceiver;
+    private Handler handler;
 
 
     @Override
@@ -108,20 +125,22 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         artistUri = Uri.parse("content://media/external/audio/albumart");
         imageLoader = ImageLoader.getInstance();
         list = PlayList.getInstance(PlayActivity.this);
+
+
         list.setIsPlaying(true);
         fab.setImageResource(R.mipmap.ic_pause_white_36dp);
+
+
         utils = SharePreferenceUtils.getInstance(PlayActivity.this);
 
-        PlayList list = PlayList.getInstance(PlayActivity.this);
-        setImage(list.getCurrentSong());
         bindService();
+        setImage(list.getCurrentSong());
 
         loadLyric(currentSong);
     }
 
 
     private void loadLyric(SongInfo info) {
-        Log.i("TAG", "loadLyric");
         new LoadLrc().execute(info);
     }
 
@@ -133,7 +152,6 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
             startIntent.setFlags(Service.START_NOT_STICKY);
             startService(startIntent);
         }
-
         Intent bindIntent = new Intent(this, MusicPlayer.class);
         bindService(bindIntent, con, 0);
     }
@@ -161,7 +179,10 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
     private void init() {
         layout = (LinearLayout) findViewById(R.id.layout);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
+
         fab = (FloatingActionButton) findViewById(R.id.fab);
+        handler = new Handler();
+
         previous = (ImageView) findViewById(R.id.previous);
         next = (ImageView) findViewById(R.id.next);
         shuffle = (ImageView) findViewById(R.id.shuffle);
@@ -194,7 +215,10 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         intentFilter.addAction("com.chenjiayao.musicplayer.next");
         registerReceiver(nextReceiver, intentFilter);
 
-
+        phoneReceiver = new PhoneReceiver();
+        IntentFilter phoneFilter = new IntentFilter();
+        phoneFilter.addAction("android.intent.action.PHONE_STATE");
+        registerReceiver(phoneReceiver, phoneFilter);
     }
 
     class LoadLrc extends AsyncTask<SongInfo, Void, List<LrcContent>> {
@@ -210,7 +234,7 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
             process.readLrc(path);  //传入歌词文件
 
             lrcList = process.getContents();
-
+            Collections.sort(lrcList);
             return lrcList;
         }
 
@@ -222,16 +246,16 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         protected void onPostExecute(List<LrcContent> lrcContents) {
 
-            lrcList = lrcContents;
-            Collections.sort(lrcList);
-
-
-            lrcView.setList(lrcList);
-            lrcView.setIndex(2);
-            lrcView.invalidate();
+            if (lrcContents == null) {
+                lrcView.setNoLrc(true);
+            } else {
+                lrcView.setNoLrc(false);
+                lrcView.setList(lrcList);
+                lrcView.setIndex(2);
+                lrcView.invalidate();
+            }
         }
     }
-
 
     @Override
     public void onClick(View v) {
@@ -281,6 +305,7 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         } else {
             fab.setImageResource(R.mipmap.ic_pause_white_36dp);
             binder.contiune();
+
         }
     }
 
@@ -321,7 +346,7 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
             }
 
             @Override
-            public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+            public void onLoadingComplete(final String imageUri, View view, final Bitmap loadedImage) {
                 new Palette.Builder(loadedImage).generate(new Palette.PaletteAsyncListener() {
                     @Override
                     public void onGenerated(Palette palette) {
@@ -330,6 +355,36 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
 
                         color = palette.getLightMutedColor(Color.parseColor("#66000000"));
                         lyricLayout.setBackgroundColor(color);
+
+//                        RenderScript script = RenderScript.create(PlayActivity.this);
+//                        Allocation allocation = Allocation.createFromBitmap(script, loadedImage);
+//                        ScriptIntrinsicBlur sb = ScriptIntrinsicBlur.create(script, allocation.getElement());
+//                        sb.setInput(allocation);
+//                        sb.setRadius(25);
+//                        sb.forEach(allocation);
+//                        allocation.copyTo(loadedImage);
+//
+//                        lyricLayout.setBackground(new BitmapDrawable(getResources(), loadedImage));
+//                        script.destroy();
+
+//                        float scaleFactor = 1;
+//                        float radius = 20;
+////                        if (downScale.isChecked()) {
+//                        scaleFactor = 8;
+//                        radius = 2;
+//                        }
+
+//                        Bitmap overlay = Bitmap.createBitmap((int) (layout.getMeasuredWidth() / scaleFactor),
+//                                (int) (layout.getMeasuredHeight() / scaleFactor), Bitmap.Config.ARGB_8888);
+//                        Canvas canvas = new Canvas(overlay);
+//                        canvas.translate(-layout.getLeft() / scaleFactor, -layout.getTop() / scaleFactor);
+//                        canvas.scale(1 / scaleFactor, 1 / scaleFactor);
+//                        Paint paint = new Paint();
+//                        paint.setFlags(Paint.FILTER_BITMAP_FLAG);
+//                        canvas.drawBitmap(loadedImage, 0, 0, paint);
+//
+//                        overlay = FastBlurUtils.doBlur(overlay, (int) radius, true);
+//                        layout.setBackground(new BitmapDrawable(getResources(), overlay));
                     }
                 });
             }
@@ -422,6 +477,12 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
                         break;
 
                 }
+                if (time != -1) {
+                    ToastUtils.showToast(PlayActivity.this, time + "分钟之后停止播放");
+                    handler.postDelayed(runnable, time * 60 * 1000);
+                } else {
+                    handler.removeCallbacks(runnable);
+                }
                 utils.setTimeToLeft(time);
                 dialog.dismiss();
             }
@@ -429,6 +490,15 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         builder.create();
         builder.show();
     }
+
+    Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+            if (list.isPlaying()) {
+                PlayActivity.this.control();
+            }
+        }
+    };
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -444,6 +514,7 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
     protected void onDestroy() {
         unregisterReceiver(progressReceiver);
         unregisterReceiver(nextReceiver);
+        unregisterReceiver(phoneReceiver);
         unbindService(con);
         super.onDestroy();
     }
@@ -478,13 +549,42 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
             seekBar.setProgress(progress);
 
             //应该在这里更新歌词
-            if (lyricLayout.getVisibility() == View.VISIBLE && !lrcList.isEmpty()) {
-                PlayActivity.this.lrcView.setIndex(getIndex());
-                PlayActivity.this.lrcView.invalidate();
+            if (lrcList != null) {
+                if (lyricLayout.getVisibility() == View.VISIBLE && !lrcList.isEmpty() && list.isPlaying()) {
+                    PlayActivity.this.lrcView.setIndex(getIndex());
+                    PlayActivity.this.lrcView.invalidate();
 
+                }
+            }
+
+            if (list.isPlaying()) {
             }
         }
 
+    }
+
+    class PhoneReceiver extends BroadcastReceiver {
+
+        PhoneStateListener listener = new PhoneStateListener() {
+            @Override
+            public void onCallStateChanged(int state, String incomingNumber) {
+                switch (state) {
+                    case TelephonyManager.CALL_STATE_IDLE:
+                        //继续播放音乐
+//                        break;
+                    case TelephonyManager.CALL_STATE_RINGING:
+                    case TelephonyManager.CALL_STATE_OFFHOOK:
+                        PlayActivity.this.control();
+                        break;
+                }
+            }
+        };
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+            tm.listen(listener, PhoneStateListener.LISTEN_CALL_STATE);
+        }
     }
 
     private int getIndex() {
@@ -505,7 +605,6 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             }
         }
-        Log.i("TAG", "" + newIndex);
         return newIndex;
     }
 

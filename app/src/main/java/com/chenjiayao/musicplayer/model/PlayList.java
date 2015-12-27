@@ -21,7 +21,7 @@ public class PlayList {
     Context context;
     public static PlayList lists;
     SharePreferenceUtils utils;
-    boolean isPlaying;
+    boolean isPlaying = true;
     int currentPos;
 
 

@@ -10,6 +10,7 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * Created by chen on 2015/12/26.
@@ -24,7 +25,7 @@ public class LrcProcess {
         contents = new ArrayList<>();
     }
 
-    public String readLrc(String path) {
+    public void readLrc(String path) {
         StringBuilder sb = new StringBuilder();
 
         if (!contents.isEmpty()) {
@@ -45,7 +46,10 @@ public class LrcProcess {
                 s = s.replace("]", "#");    //作为分隔符
                 // [01:43.00][00:19.00]今天我寒夜里看雪飘过
                 // 01:43.00#00:19.00#今天我寒夜里看雪飘过
+
+                s = s.replace(" ", "");
                 String splitData[] = s.split("#");
+                Log.i("TAG", s);
                 String lrc = splitData[splitData.length - 1];
 
                 for (int i = (splitData.length - 2); i >= 0; i--) {
@@ -60,9 +64,12 @@ public class LrcProcess {
             sb.append("没有歌词文件");
             e.printStackTrace();
         }
-        return sb.toString();
     }
 
+    public static boolean isInteger(String str) {
+        Pattern pattern = Pattern.compile("^[-\\+]?[\\d]*$");
+        return pattern.matcher(str).matches();
+    }
 
     /**
      * 00:19.00
