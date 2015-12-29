@@ -1,4 +1,4 @@
 # MusicPlayer
 MusicPlayer
 
-简洁的音乐播放器
+简洁本地音乐播放器
