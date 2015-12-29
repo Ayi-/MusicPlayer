@@ -136,8 +136,6 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         switch (id) {
-            case R.id.nav_playing:
-                break;
             case R.id.nav_song_list:
                 break;
             case R.id.nav_about:

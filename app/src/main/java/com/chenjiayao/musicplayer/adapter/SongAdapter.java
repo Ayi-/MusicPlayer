@@ -3,6 +3,7 @@ package com.chenjiayao.musicplayer.adapter;
 import android.content.ContentUris;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
@@ -14,24 +15,54 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.chenjiayao.musicplayer.R;
+import com.chenjiayao.musicplayer.model.PlayList;
 import com.chenjiayao.musicplayer.model.SongInfo;
+import com.chenjiayao.musicplayer.utils.ItemTouchHelperAdapter;
+import com.chenjiayao.musicplayer.utils.ItemTouchHelperViewHolder;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
 
+import org.litepal.crud.DataSupport;
+
+import java.io.File;
 import java.util.List;
 
 /**
  * Created by chen on 2015/12/16.
  */
-public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> {
+public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder>
+        implements ItemTouchHelperAdapter {
 
     private Context context;
     private LayoutInflater inflater;
     private List<SongInfo> list;
     Uri artistUri = Uri.parse("content://media/external/audio/albumart");
     ImageLoader imageLoader = ImageLoader.getInstance();
+
+
+    @Override
+    public void onItemDismiss(final int position) {
+
+
+        //删除数据库 删除本地音乐
+
+
+        new AsyncTask<SongInfo, Void, Void>() {
+            @Override
+            protected Void doInBackground(SongInfo... params) {
+                Log.i("TAG", params[0].getPath());
+                Log.i("TAG", params[0].getSongName());
+                DataSupport.deleteAll(SongInfo.class, "songid = ?", String.valueOf(params[0].getSongId()));
+
+                return null;
+            }
+
+        }.execute(list.get(position));
+        list.remove(position);
+        notifyItemRemoved(position);
+    }
 
 
     public interface onItemClickListener {
@@ -75,7 +106,8 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
         return list.size();
     }
 
-    public class MyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public class MyViewHolder extends RecyclerView.ViewHolder
+            implements View.OnClickListener, ItemTouchHelperViewHolder {
 
         TextView songName;
         TextView singer;
@@ -95,6 +127,16 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
                 int pos = (int) v.getTag();
                 listener.onItemClick(pos, v);
             }
+        }
+
+        @Override
+        public void onItemSelected() {
+            itemView.setBackgroundColor(Color.LTGRAY);
+        }
+
+        @Override
+        public void onItemClear() {
+            itemView.setBackgroundColor(0);
         }
     }
 }

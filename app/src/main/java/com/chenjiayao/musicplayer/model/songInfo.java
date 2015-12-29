@@ -1,8 +1,10 @@
 package com.chenjiayao.musicplayer.model;
 
+import android.util.Log;
+
 import org.litepal.crud.DataSupport;
 
-public class SongInfo extends DataSupport {
+public class SongInfo extends DataSupport implements Comparable<SongInfo>{
 
     int id;
 
@@ -102,5 +104,10 @@ public class SongInfo extends DataSupport {
 
     public void setSongName(String songName) {
         this.songName = songName;
+    }
+
+    @Override
+    public int compareTo(SongInfo another) {
+        return this.getPinyin().compareTo(another.getPinyin());
     }
 }

@@ -9,7 +9,7 @@
         android:layout_width="25dp"
         android:layout_height="match_parent"
         android:layout_alignParentRight="true"
-        android:background="#94C4BC"
+        android:background="@color/before"
         android:orientation="vertical">
 
     </com.chenjiayao.musicplayer.widgets.QuickSearchView>

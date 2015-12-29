@@ -19,6 +19,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -36,11 +37,14 @@ import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.chenjiayao.musicplayer.R;
 import com.chenjiayao.musicplayer.constant;
@@ -113,6 +117,9 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
     private List<LrcContent> lrcList;
     private PhoneReceiver phoneReceiver;
     private Handler handler;
+    private WindowManager wm;
+    private TextView textView;
+    private PlayActivity.earPhoneReceiver earPhoneReceiver;
 
 
     @Override
@@ -126,17 +133,15 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         imageLoader = ImageLoader.getInstance();
         list = PlayList.getInstance(PlayActivity.this);
 
-
-        list.setIsPlaying(true);
-        fab.setImageResource(R.mipmap.ic_pause_white_36dp);
-
-
         utils = SharePreferenceUtils.getInstance(PlayActivity.this);
 
         bindService();
         setImage(list.getCurrentSong());
 
         loadLyric(currentSong);
+
+        list.setIsPlaying(true);
+        fab.setImageResource(R.mipmap.ic_pause_white_36dp);
     }
 
 
@@ -219,6 +224,25 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         IntentFilter phoneFilter = new IntentFilter();
         phoneFilter.addAction("android.intent.action.PHONE_STATE");
         registerReceiver(phoneReceiver, phoneFilter);
+
+
+        earPhoneReceiver = new earPhoneReceiver();
+        IntentFilter earPhoneFilter = new IntentFilter("android.intent.action.HEADSET_PLUG");
+        registerReceiver(earPhoneReceiver, earPhoneFilter);
+
+        wm = (WindowManager) getApplicationContext().getSystemService(WINDOW_SERVICE);
+        WindowManager.LayoutParams params = new WindowManager.LayoutParams();
+        params.type = WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
+        params.width = WindowManager.LayoutParams.WRAP_CONTENT;
+        params.height = WindowManager.LayoutParams.WRAP_CONTENT;
+        params.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+
+        params.alpha = 0.0f;
+
+        View view = LayoutInflater.from(PlayActivity.this).inflate(R.layout.layout_launcher, null, false);
+        textView = (TextView) view.findViewById(R.id.tv_lrc);
+        wm.addView(view, params);
     }
 
     class LoadLrc extends AsyncTask<SongInfo, Void, List<LrcContent>> {
@@ -251,7 +275,7 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
             } else {
                 lrcView.setNoLrc(false);
                 lrcView.setList(lrcList);
-                lrcView.setIndex(2);
+                lrcView.setIndex(0);
                 lrcView.invalidate();
             }
         }
@@ -268,7 +292,7 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.lyric_layout:   //从歌词界面切换到文艺界面
                 lyricLayout.setVisibility(View.INVISIBLE);
-                artistConver.setVisibility(View.VISIBLE);
+                seekBar.setVisibility(View.VISIBLE);
                 break;
             case R.id.previous:     //上一首
                 previousUI();
@@ -281,7 +305,7 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.album_art:  //从文艺界面切换到歌词界面
                 lyricLayout.setVisibility(View.VISIBLE);
-                artistConver.setVisibility(View.INVISIBLE);
+                seekBar.setVisibility(View.INVISIBLE);
                 break;
         }
     }
@@ -295,6 +319,7 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         seekBar.setMax(currentSong.getDuration());
         loadLyric(info);
         lrcView.setIndex(1);
+        textView.setText("");
     }
 
 
@@ -305,7 +330,6 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         } else {
             fab.setImageResource(R.mipmap.ic_pause_white_36dp);
             binder.contiune();
-
         }
     }
 
@@ -320,6 +344,7 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
 
         loadLyric(info);
         lrcView.setIndex(1);
+        textView.setText("");
     }
 
 
@@ -497,6 +522,8 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
             if (list.isPlaying()) {
                 PlayActivity.this.control();
             }
+            SharePreferenceUtils.getInstance(PlayActivity.this)
+                    .setTimeToLeft(-1);
         }
     };
 
@@ -515,6 +542,7 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         unregisterReceiver(progressReceiver);
         unregisterReceiver(nextReceiver);
         unregisterReceiver(phoneReceiver);
+        unregisterReceiver(earPhoneReceiver);
         unbindService(con);
         super.onDestroy();
     }
@@ -553,6 +581,10 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
                 if (lyricLayout.getVisibility() == View.VISIBLE && !lrcList.isEmpty() && list.isPlaying()) {
                     PlayActivity.this.lrcView.setIndex(getIndex());
                     PlayActivity.this.lrcView.invalidate();
+
+                    textView.setText("  ");
+                    Log.i("TAG", textView.getText().toString());
+                    textView.setText(lrcList.get(getIndex()).getLrcStr());
 
                 }
             }
@@ -617,5 +649,30 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
             PlayActivity.this.nextUI();
         }
     }
+
+
+    //////////////////////////////////////////
+    class earPhoneReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(Intent.ACTION_HEADSET_PLUG)) {
+                int state = intent.getIntExtra("state", -1);
+                switch (state) {
+                    case 0:
+                        Log.i("TAg", "拔出了.....");
+                        fab.setImageResource(R.mipmap.ic_play_arrow_white_36dp);
+                        break;
+                    case 1:
+                        Log.i("TAg", "插入了 .....");
+                        //这里
+                        break;
+                    default:
+                        Log.i("TAG", "fasdfdsfds");
+                }
+            }
+        }
+    }
+
 }
 

@@ -74,10 +74,10 @@ public class LrcView extends TextView {
         currentPaint.setColor(Color.parseColor("#BA474D"));
         noCurrentPaint.setColor(Color.parseColor("#96C5BE"));
 
-        currentPaint.setTextSize(29);
+        currentPaint.setTextSize(35);
         currentPaint.setTypeface(Typeface.SERIF);
 
-        noCurrentPaint.setTextSize(25);
+        noCurrentPaint.setTextSize(29);
         noCurrentPaint.setTypeface(Typeface.DEFAULT);
 
         setText("");

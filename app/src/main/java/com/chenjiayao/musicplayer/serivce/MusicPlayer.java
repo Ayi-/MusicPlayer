@@ -1,5 +1,6 @@
 package com.chenjiayao.musicplayer.serivce;
 
+import android.app.ActionBar;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -16,7 +17,9 @@ import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v7.app.NotificationCompat;
 import android.util.Log;
+import android.view.WindowManager;
 import android.widget.RemoteViews;
+import android.widget.TextView;
 
 import com.chenjiayao.musicplayer.R;
 import com.chenjiayao.musicplayer.constant;
@@ -39,6 +42,9 @@ public class MusicPlayer extends Service implements MediaPlayer.OnCompletionList
     private SongInfo currentInfo;
     private KillReceiver killReceiver;
     private NotificationManager nm;
+    private WindowManager wm;
+    private TextView view;
+    private MusicPlayer.earPhoneReceiver earPhoneReceiver;
 
 
     @Nullable
@@ -96,7 +102,7 @@ public class MusicPlayer extends Service implements MediaPlayer.OnCompletionList
         PendingIntent pi = PendingIntent.getActivity(getApplicationContext(), 0, intent, 0);
 
         Notification.Builder builder = new Notification.Builder(getApplicationContext());
-        builder.setSmallIcon(R.mipmap.ic_launcher)
+        builder.setSmallIcon(R.mipmap.ic_album_black_24dp)
                 .setPriority(Notification.PRIORITY_HIGH)
                 .setWhen(System.currentTimeMillis())
                 .setContent(remoteViews)
@@ -104,6 +110,8 @@ public class MusicPlayer extends Service implements MediaPlayer.OnCompletionList
                 .setContentIntent(pi);
 
         nm.notify(0, builder.build());
+
+
     }
 
 
@@ -126,6 +134,10 @@ public class MusicPlayer extends Service implements MediaPlayer.OnCompletionList
         IntentFilter killFilter = new IntentFilter("com.chenjiayao.musicplayer.kill");
         registerReceiver(killReceiver, killFilter);
 
+
+        earPhoneReceiver earPhoneReceiver = new earPhoneReceiver();
+        IntentFilter earPhoneFilter = new IntentFilter("android.intent.action.HEADSET_PLUG");
+        registerReceiver(earPhoneReceiver, earPhoneFilter);
 
     }
 
@@ -195,7 +207,6 @@ public class MusicPlayer extends Service implements MediaPlayer.OnCompletionList
             startPlayService(list.getCurrentSong());
         }
 
-
     }
 
 
@@ -218,6 +229,26 @@ public class MusicPlayer extends Service implements MediaPlayer.OnCompletionList
         }
     }
 
+
+    class earPhoneReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(Intent.ACTION_HEADSET_PLUG)) {
+                int state = intent.getIntExtra("state", -1);
+                switch (state) {
+                    case 0:
+                        if (list.isPlaying()) {
+                            MusicPlayer.this.binder.pause();
+                        }
+                        break;
+                    case 1:
+                        break;
+                    default:
+                }
+            }
+        }
+    }
 
 
 }

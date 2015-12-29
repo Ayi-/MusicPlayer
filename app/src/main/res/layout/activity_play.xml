@@ -55,6 +55,7 @@
             app:pointer_halo_color="#880174DF" />
 
         <FrameLayout
+            android:alpha="0.9"
             android:id="@+id/lyric_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

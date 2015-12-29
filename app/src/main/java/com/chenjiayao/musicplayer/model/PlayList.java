@@ -42,6 +42,14 @@ public class PlayList {
     }
 
 
+    public List<SongInfo> getSongInfos() {
+        return songInfos;
+    }
+
+    public void setSongInfos(List<SongInfo> songInfos) {
+        this.songInfos = songInfos;
+    }
+
     public int getCurrentPos() {
         return currentPos;
     }

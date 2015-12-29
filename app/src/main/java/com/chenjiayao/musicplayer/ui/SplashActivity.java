@@ -21,6 +21,7 @@ import com.chenjiayao.musicplayer.widgets.MyAnimateListener;
 
 import org.litepal.crud.DataSupport;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -48,7 +49,7 @@ public class SplashActivity extends AppCompatActivity {
                 .setListener(new MyAnimateListener() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
-                        super.onAnimationEnd(animation);
+
                         Intent intent = new Intent(SplashActivity.this, MainActivity.class);
                         startActivity(intent);
                         finish();

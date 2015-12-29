@@ -8,6 +8,7 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,13 +20,14 @@ import com.chenjiayao.musicplayer.model.PlayList;
 import com.chenjiayao.musicplayer.model.SongInfo;
 import com.chenjiayao.musicplayer.ui.PlayActivity;
 import com.chenjiayao.musicplayer.utils.ToastUtils;
+import com.chenjiayao.musicplayer.utils.TouchDeleteCallback;
 import com.chenjiayao.musicplayer.widgets.QuickSearchView;
 
 
 import org.litepal.crud.DataSupport;
 
-import java.security.Policy;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -52,8 +54,14 @@ public class SongFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        long l = System.currentTimeMillis();
+
         songInfos = new ArrayList<>();
         songInfos = DataSupport.findAll(SongInfo.class, true);
+        Collections.sort(songInfos);
+
+        Log.i("TAG", " : " + (System.currentTimeMillis() - l));
         view = LayoutInflater.from(getActivity()).inflate(R.layout.fragment_song, null, true);
         recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
         searchView = (QuickSearchView) view.findViewById(R.id.indicator);
@@ -96,6 +104,11 @@ public class SongFragment extends Fragment {
         recyclerView.setAdapter(adapter);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setHasFixedSize(true);
+
+        TouchDeleteCallback callback = new TouchDeleteCallback(adapter);
+        ItemTouchHelper touchHelper = new ItemTouchHelper(callback);
+        touchHelper.attachToRecyclerView(recyclerView);
+
         adapter.setListener(new SongAdapter.onItemClickListener() {
             @Override
             public void onItemClick(int pos, View view) {
